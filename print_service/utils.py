@@ -1,15 +1,31 @@
 import random
 import re
-from datetime import date
+from datetime import date, datetime, timedelta
 
+from sqlalchemy.orm.session import Session
+
+from print_service.models import File
 from print_service.settings import Settings, get_settings
 
 
 settings: Settings = get_settings()
 
 
-def generate_pin():
-    return ''.join(random.choice(settings.PIN_SYMBOLS) for i in range(settings.PIN_LENGTH))
+def generate_pin(session: Session):
+    for i in range(15):
+        pin = ''.join(random.choice(settings.PIN_SYMBOLS) for i in range(settings.PIN_LENGTH))
+        cnt = (
+            session.query(File)
+            .filter(
+                File.pin == pin,
+                File.created_at + timedelta(hours=settings.STORAGE_TIME) >= datetime.utcnow(),
+            )
+            .count()
+        )
+        if cnt == 0:
+            return pin
+    else:
+        raise RuntimeError('Can not create unique PIN')
 
 
 def generate_filename(original_filename: str):

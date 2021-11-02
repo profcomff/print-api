@@ -43,7 +43,10 @@ async def send(surname: str, number: str, filename: str):
     if not user:
         raise HTTPException(403, 'User not found in trade union list')
 
-    pin = generate_pin()
+    try:
+        pin = generate_pin(db.session)
+    except RuntimeError:
+        raise HTTPException(500, 'Can not generate PIN. Too many users?')
     filename = generate_filename(filename)
 
     file = FileModel(pin=pin, file=filename)
@@ -63,7 +66,10 @@ async def send(surname: str, number: str, filename: str):
 )
 async def upload_file(pin: str, file: UploadFile = File(None)):
     file_model = (
-        db.session.query(FileModel).filter(func.upper(FileModel.pin) == pin.upper()).one_or_none()
+        db.session.query(FileModel)
+        .filter(func.upper(FileModel.pin) == pin.upper())
+        .order_by(FileModel.created_at.desc())
+        .one_or_none()
     )
     if not file_model:
         raise HTTPException(404, f'Pin {pin} not found')
@@ -91,14 +97,17 @@ async def upload_file(pin: str, file: UploadFile = File(None)):
 @print_router.get('/file/{pin:str}', responses={404: {'detail': 'Pin not found'}})
 async def print(pin: str):
     file_model = (
-        db.session.query(FileModel).filter(func.upper(FileModel.pin) == pin.upper()).one_or_none()
+        db.session.query(FileModel)
+        .filter(func.upper(FileModel.pin) == pin.upper())
+        .order_by(FileModel.created_at.desc())
+        .one_or_none()
     )
     if not file_model:
         raise HTTPException(404, f'Pin {pin} not found')
 
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if not exists(path):
-        raise HTTPException(415, 'File already uploaded')
+        raise HTTPException(415, 'File has not uploaded yet')
 
     return {'filename': file_model.file}
 

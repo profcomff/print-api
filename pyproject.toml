@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 105
+target-version = ['py38']
+skip-string-normalization = true
+
+[tool.isort]
+line_length = 105
+multi_line_output = 3
+lines_after_imports = 2
+include_trailing_comma = true

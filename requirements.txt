@@ -1,0 +1,10 @@
+aiofiles
+click
+pydantic
+uvicorn
+sqlalchemy
+psycopg2-binary
+alembic
+fastapi
+fastapi-sqlalchemy
+python-multipart

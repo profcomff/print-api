@@ -1,18 +1,14 @@
 import string
 from functools import lru_cache
-from pathlib import Path
 from typing import List
 
-from pydantic import BaseConfig
+from pydantic import BaseSettings
 from pydantic.networks import HttpUrl, PostgresDsn
 
 
-class Settings(BaseConfig):
+class Settings(BaseSettings):
+    ROOT: HttpUrl = 'https://app.profcomff.com/print'
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
-
-    ROOT: HttpUrl = 'https://api.profcomff.com/print'
-    OK_PAGE: HttpUrl = "https://api.profcomff.com/print/static/pin?pin={}"
-    FAIL_PAGE: HttpUrl = "https://api.profcomff.com/print/static/fail?description={}"
 
     CONTENT_TYPES: List[str] = ['application/pdf']
     MAX_SIZE: int = 5000000

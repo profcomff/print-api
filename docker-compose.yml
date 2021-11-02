@@ -1,0 +1,22 @@
+version: "3.6"
+
+services:
+  api:
+    build: .
+    restart: always
+    env_file: .env
+    volumes:
+      - user-data:/app/static
+    networks:
+      frontend:
+        aliases:
+          - com_profcomff_app_print
+
+networks:
+  frontend:
+    name: web
+    external: true
+
+volumes:
+  user-data:
+    name: pc-printer-files

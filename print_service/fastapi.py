@@ -23,6 +23,7 @@ app = FastAPI(
     title='Print service',
     description='Service to send print docs and recieve them from terminal',
     version=__version__,
+    root_path=settings.ROOT,
 )
 app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN)
 

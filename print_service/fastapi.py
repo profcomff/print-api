@@ -12,6 +12,7 @@ from sqlalchemy import func
 from print_service import __version__
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
+from print_service.schema import SendInput
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin
 
@@ -31,12 +32,12 @@ print_router = APIRouter()
 
 
 @print_router.post('/file', responses={403: {'detail': 'User error'}})
-async def send(surname: str, number: str, filename: str):
+async def send(inp: SendInput):
     user = (
         db.session.query(UnionMember)
         .filter(
-            func.upper(UnionMember.number) == number.upper(),
-            func.upper(UnionMember.surname) == surname.upper(),
+            func.upper(UnionMember.number) == inp.number.upper(),
+            func.upper(UnionMember.surname) == inp.surname.upper(),
         )
         .one_or_none()
     )
@@ -47,7 +48,7 @@ async def send(surname: str, number: str, filename: str):
         pin = generate_pin(db.session)
     except RuntimeError:
         raise HTTPException(500, 'Can not generate PIN. Too many users?')
-    filename = generate_filename(filename)
+    filename = generate_filename(inp.filename)
 
     file = FileModel(pin=pin, file=filename)
     file.owner = user

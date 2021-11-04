@@ -7,6 +7,7 @@ from fastapi import APIRouter, FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi_sqlalchemy import DBSessionMiddleware, db
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 
 from print_service import __version__
@@ -30,6 +31,21 @@ app = FastAPI(
     root_path=settings.ROOT,
 )
 app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN)
+
+origins = [
+    "https://app.profcomff.com",
+    "http://app.profcomff.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 print_router = APIRouter()
 

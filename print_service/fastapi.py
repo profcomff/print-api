@@ -5,9 +5,9 @@ from typing import Any, Dict
 import aiofiles
 from fastapi import APIRouter, FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_sqlalchemy import DBSessionMiddleware, db
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 
 from print_service import __version__
@@ -24,8 +24,7 @@ logger = getLogger(__name__)
 app = FastAPI(
     title='Сервис отправки заданий печати',
     description=(
-        'Серверная часть сервиса отправки заданий на печать и получения '
-        'файлов для печати с терминала'
+        'Серверная часть сервиса отправки заданий на печать и получения ' 'файлов для печати с терминала'
     ),
     version=__version__,
     root_path=settings.ROOT,
@@ -35,6 +34,8 @@ app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN)
 origins = [
     "https://app.profcomff.com",
     "http://app.profcomff.com",
+    "https://www.profcomff.com",
+    "http://www.profcomff.com",
     "http://localhost",
     "http://localhost:8080",
 ]

@@ -21,8 +21,11 @@ settings: Settings = get_settings()
 logger = getLogger(__name__)
 
 app = FastAPI(
-    title='Print service',
-    description='Service to send print docs and recieve them from terminal',
+    title='Сервис отправки заданий печати',
+    description=(
+        'Серверная часть сервиса отправки заданий на печать и получения '
+        'файлов для печати с терминала'
+    ),
     version=__version__,
     root_path=settings.ROOT,
 )
@@ -33,6 +36,10 @@ print_router = APIRouter()
 
 @print_router.post('/file', responses={403: {'detail': 'User error'}})
 async def send(inp: SendInput):
+    """Получить пин код для загрузки и скачивания файла.
+
+    Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
+    """
     user = (
         db.session.query(UnionMember)
         .filter(
@@ -66,6 +73,12 @@ async def send(inp: SendInput):
     },
 )
 async def upload_file(pin: str, file: UploadFile = File(None)):
+    """Загрузить файл на сервер.
+
+    Требует пин-код, полученный в методе POST `/file`. Файл для пин-кода можно
+    загрузить лишь один раз. Файл должен быть размером до 5 000 000 байт
+    (меняется в настройках сервера).
+    """
     file_model = (
         db.session.query(FileModel)
         .filter(func.upper(FileModel.pin) == pin.upper())
@@ -97,6 +110,12 @@ async def upload_file(pin: str, file: UploadFile = File(None)):
 
 @print_router.get('/file/{pin:str}', responses={404: {'detail': 'Pin not found'}})
 async def print(pin: str):
+    """Получить файл для печати.
+
+    Требует пин-код, полученный в методе POST `/file`. Файл можно скачать
+    бесконечное количество раз в течение 7 дней после загрузки (меняется в
+    настройках сервера).
+    """
     file_model = (
         db.session.query(FileModel)
         .filter(func.upper(FileModel.pin) == pin.upper())

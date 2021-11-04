@@ -89,13 +89,15 @@ async def send(inp: SendInput):
         415: {'detail': 'File error'},
     },
 )
-async def upload_file(pin: str, file: UploadFile = File(None)):
+async def upload_file(pin: str, file: UploadFile = File(...)):
     """Загрузить файл на сервер.
 
     Требует пин-код, полученный в методе POST `/file`. Файл для пин-кода можно
     загрузить лишь один раз. Файл должен быть размером до 5 000 000 байт
     (меняется в настройках сервера).
     """
+    if file == ...:
+        raise HTTPException(400, 'No file recieved')
     file_model = (
         db.session.query(FileModel)
         .filter(func.upper(FileModel.pin) == pin.upper())

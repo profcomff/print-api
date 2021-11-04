@@ -1,13 +1,13 @@
 import string
 from functools import lru_cache
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseSettings
 from pydantic.networks import HttpUrl, PostgresDsn
 
 
 class Settings(BaseSettings):
-    ROOT: HttpUrl | None = None
+    ROOT: Optional[HttpUrl] = None
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
 
     CONTENT_TYPES: List[str] = ['application/pdf']

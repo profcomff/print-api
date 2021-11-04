@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 ENV APP_NAME=print_service
 ENV APP_MODULE=${APP_NAME}.fastapi:app
 

@@ -51,6 +51,17 @@ app.add_middleware(
 print_router = APIRouter()
 
 
+@print_router.get('/is_union_member')
+async def check_union_member(surname: str, number: str):
+    """
+    """
+    user = db.session.query(UnionMember).filter(
+        func.upper(UnionMember.number) == number.upper(),
+        func.upper(UnionMember.surname) == surname.upper(),
+    ).one_or_none()
+    return bool(user)
+
+
 @print_router.post('/file', responses={403: {'detail': 'User error'}})
 async def send(inp: SendInput):
     """Получить пин код для загрузки и скачивания файла.

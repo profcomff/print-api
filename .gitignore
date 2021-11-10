@@ -13,7 +13,7 @@ tests/.cache/
 
 # virtualenv
 venv/
-static/
+static/**
 
 # PyCharm
 .idea

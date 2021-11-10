@@ -4,6 +4,7 @@ from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
+from sqlalchemy.sql.sqltypes import Boolean
 
 
 @as_declarative()
@@ -28,6 +29,9 @@ class File(Model):
     pin = Column(String, nullable=False)
     file = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey('union_member.id'), nullable=False)
+    option_pages = Column(String)
+    option_copies = Column(Integer)
+    option_two_sided = Column(Boolean)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 

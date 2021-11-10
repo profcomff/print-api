@@ -1,9 +1,8 @@
 import logging
 import sys
 
+import print_service
 from print_service.cli import main
 
-
-logging.basicConfig(level=logging.DEBUG)
 
 sys.exit(main(obj={}))

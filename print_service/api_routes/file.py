@@ -21,7 +21,7 @@ router = APIRouter()
 
 
 @router.post(
-    '/',
+    '',
     responses={
         403: {'detail': 'User error'},
     },

@@ -11,7 +11,7 @@ from sqlalchemy import func
 from print_service import __version__
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
-from print_service.schema import RecieveOutput, SendInput, SendInputUpdate, SendOutput
+from print_service.schema import ReceiveOutput, SendInput, SendInputUpdate, SendOutput
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin
 
@@ -166,7 +166,7 @@ async def update_file_options(
         404: {'detail': 'Pin not found'},
         415: {'detail': 'File error'},
     },
-    response_model=RecieveOutput,
+    response_model=ReceiveOutput,
 )
 async def print_file(pin: str, settings: Settings = Depends(get_settings)):
     """Получить файл для печати.
@@ -191,8 +191,8 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
     return {
         'filename': file_model.file,
         'options': {
-            'pages': file_model.option_pages,
-            'copies': file_model.option_copies,
-            'two_sided': file_model.option_two_sided,
+            'pages': file_model.option_pages or '',
+            'copies': file_model.option_copies or 1,
+            'two_sided': file_model.option_two_sided or False,
         },
     }

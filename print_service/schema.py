@@ -49,7 +49,7 @@ class SendOutput(BaseModel):
     options: PrintOptions
 
 
-class RecieveOutput(BaseModel):
+class ReceiveOutput(BaseModel):
     filename: str = Field(
         description='Название файла, который можно запросить по адресу https://app.profcomff.com/print/static/{filename}',
         example='2021-11-02-ZMNF5V...9.pdf',

@@ -6,9 +6,9 @@ from pydantic.fields import Field
 
 
 class PrintOptions(BaseModel):
-    pages: Optional[str] = Field('', description='Страницы для печати', example='2-4,6')
-    copies: Optional[int] = Field(1, description='Количество копий для печати')
-    two_sided: Optional[bool] = Field(False, description='Включить печать с двух сторон листа')
+    pages: str = Field('', description='Страницы для печати', example='2-4,6')
+    copies: int = Field(1, description='Количество копий для печати')
+    two_sided: bool = Field(False, description='Включить печать с двух сторон листа')
 
     @validator('pages', pre=True, always=True)
     def validate_pages(cls, value: str):
@@ -34,7 +34,7 @@ class SendInput(BaseModel):
         description='Название файла',
         example='filename.pdf',
     )
-    options: Optional[PrintOptions]
+    options: PrintOptions = PrintOptions()
 
 
 class SendInputUpdate(BaseModel):

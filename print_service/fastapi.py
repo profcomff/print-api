@@ -21,7 +21,7 @@ app = FastAPI(
     version=__version__,
     root_path=settings.ROOT,
 )
-app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN)
+app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN, engine_args=dict(pool_pre_ping=True))
 
 origins = [
     "https://app.profcomff.com",

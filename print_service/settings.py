@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     PIN_SYMBOLS: str = string.ascii_uppercase + string.digits
     PIN_LENGTH: int = 6
 
+    CORS_ALLOW_ORIGINS: list[str] = ['*']
+    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_METHODS: list[str] = ['*']
+    CORS_ALLOW_HEADERS: list[str] = ['*']
+
 
 @lru_cache()
 def get_settings() -> Settings:

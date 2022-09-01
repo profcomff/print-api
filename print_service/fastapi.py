@@ -23,20 +23,12 @@ app = FastAPI(
 )
 app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN, engine_args=dict(pool_pre_ping=True))
 
-origins = [
-    "https://app.profcomff.com",
-    "http://app.profcomff.com",
-    "https://www.profcomff.com",
-    "http://www.profcomff.com",
-    "http://localhost",
-    "http://localhost:8080",
-]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.CORS_ALLOW_ORIGINS,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_methods=settings.CORS_ALLOW_METHODS,
+    allow_headers=settings.CORS_ALLOW_HEADERS,
 )
 
 

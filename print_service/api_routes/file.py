@@ -6,7 +6,7 @@ from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from print_service import __version__
 from print_service.models import File as FileModel
@@ -32,10 +32,15 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
 
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
+    user = db.session.query(UnionMember)
+    if not settings.ALLOW_STUDENT_NUMBER:
+        user = user.filter(UnionMember.union_number != None)
     user = (
-        db.session.query(UnionMember)
-        .filter(
-            func.upper(UnionMember.number) == inp.number.upper(),
+        user.filter(
+            or_(
+                func.upper(UnionMember.student_number) == inp.number.upper(),
+                func.upper(UnionMember.union_number) == inp.number.upper(),
+            ),
             func.upper(UnionMember.surname) == inp.surname.upper(),
         )
         .one_or_none()

@@ -1,6 +1,6 @@
 aiofiles
 click
-pydantic
+pydantic[env]
 uvicorn
 sqlalchemy
 psycopg2-binary

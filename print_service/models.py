@@ -17,7 +17,8 @@ class UnionMember(Model):
 
     id = Column(Integer, primary_key=True)
     surname = Column(String, nullable=False)
-    number = Column(String, nullable=False)
+    union_number = Column(String, nullable=True)
+    student_number = Column(String, nullable=True)
 
     files = relationship('File', back_populates='owner')
 

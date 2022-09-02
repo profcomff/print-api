@@ -1,5 +1,5 @@
 import re
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 from pydantic.fields import Field
@@ -27,7 +27,7 @@ class SendInput(BaseModel):
         example='Иванов',
     )
     number: str = Field(
-        description='Номер профсоюзного билета',
+        description='Номер профсоюзного или студенческого билетов',
         example='1015000',
     )
     filename: str = Field(
@@ -55,3 +55,14 @@ class ReceiveOutput(BaseModel):
         example='2021-11-02-ZMNF5V...9.pdf',
     )
     options: PrintOptions
+
+
+class UserCreate(BaseModel):
+    username: Optional[str]
+    union_number: Optional[str]
+    student_number: Optional[str]
+
+
+class UpdateUserList(BaseModel):
+    users: List[UserCreate]
+    secret: str

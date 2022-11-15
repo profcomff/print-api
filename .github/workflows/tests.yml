@@ -29,7 +29,7 @@ jobs:
           DB_DSN=postgresql://postgres@localhost:5432/postgres alembic upgrade head
       - name: Build coverage file
         run: |
-          DB_DSN=postgresql://postgres@localhost:5432/postgres pytest --cache-clear --cov=print_service tests > pytest-coverage.txt
+          SECRET_KEY='fg' DB_DSN=postgresql://postgres@localhost:5432/postgres pytest --cache-clear --cov=print_service tests > pytest-coverage.txt
       - name: Print report
         if: always()
         run: |

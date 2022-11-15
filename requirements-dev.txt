@@ -4,3 +4,4 @@ isort
 pytest
 requests
 httpx
+pytest-cov

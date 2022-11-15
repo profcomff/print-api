@@ -1,3 +1,5 @@
 pydocstyle
 black
 isort
+pytest
+requests

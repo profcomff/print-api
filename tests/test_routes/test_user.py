@@ -1,5 +1,4 @@
 import pytest
-import requests
 from starlette import status
 from print_service.settings import get_settings
 

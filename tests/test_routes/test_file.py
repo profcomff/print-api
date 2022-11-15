@@ -1,9 +1,5 @@
-import os.path
-
 from print_service.settings import get_settings
 from print_service.models import File
-from unittest.mock import Mock
-import pytest
 from starlette import status
 
 

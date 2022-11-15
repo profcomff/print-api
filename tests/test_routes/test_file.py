@@ -1,6 +1,7 @@
 from print_service.settings import get_settings
 from print_service.models import File
 from starlette import status
+import json
 
 
 class TestFile:
@@ -18,7 +19,7 @@ class TestFile:
                 "two_sided": False
             }
         }
-        res = client.post(self.url, json=body)
+        res = client.post(self.url, data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
         db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
         assert db_file is not None
@@ -35,7 +36,7 @@ class TestFile:
                 "two_sided": False
             }
         }
-        res = client.post(self.url, json=body)
+        res = client.post(self.url, data=json.dumps(body))
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
     def test_get_file_no_path(self, uploaded_file_db, client):

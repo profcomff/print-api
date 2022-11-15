@@ -1,4 +1,5 @@
 import pytest
+import json
 from starlette import status
 from print_service.settings import get_settings
 
@@ -34,7 +35,7 @@ class TestUser:
             ],
             'secret': self.settings.SECRET_KEY,
         }
-        res = client.post(self.url, json=body)
+        res = client.post(self.url, data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
 
     def test_post_incorrect_password(self, client):
@@ -48,7 +49,7 @@ class TestUser:
             ],
             'secret': f"{self.settings.SECRET_KEY}secret!!!",
         }
-        res = client.post(self.url, json=body)
+        res = client.post(self.url, data=json.dumps(body))
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
@@ -88,5 +89,5 @@ class TestUser:
     )
     def test_post_list_duplicates(self, users, client):
         body = {'users': users, 'secret': self.settings.SECRET_KEY}
-        res = client.post(self.url, json=body)
+        res = client.post(self.url, data=json.dumps(body))
         assert res.status_code == status.HTTP_400_BAD_REQUEST

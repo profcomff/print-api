@@ -12,9 +12,11 @@ class PrintOptions(BaseModel):
 
     @validator('pages', pre=True, always=True)
     def validate_pages(cls, value: str):
+        if not isinstance(value, str):
+            raise ValueError('Value must be str')
+        value = re.sub(r'\s+', '', value)
         if value == '':
             return ''
-        value = re.sub(r'\s+', '', value)
         value_arr = re.split(r'[-,]', value)
         if not value_arr == sorted(value_arr) or re.findall(r'[^0-9-,]', value) != []:
             raise ValueError('Pages must be formated as 2-5,7')

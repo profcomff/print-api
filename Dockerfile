@@ -1,10 +1,14 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
-ENV APP_NAME=print_service
-ENV APP_MODULE=${APP_NAME}.fastapi:app
+FROM python:3.10
+WORKDIR /app
+RUN mkdir -p static/cache && mkdir -p static/photo/lecturer
 
 COPY ./requirements.txt /app/
-RUN pip install -r /app/requirements.txt  && mkdir /app/static
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY ./alembic.ini /app/alembic.ini
-COPY ./migrations /app/migrations
-COPY ./${APP_NAME} /app/${APP_NAME}
+ADD gunicorn_conf.py alembic.ini /app/
+ADD migrations /app/migrations
+ADD print_service /app/print_service
+
+VOLUME ["/app/static"]
+
+CMD [ "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "/app/gunicorn_conf.py", "print_service.fastapi:app" ]

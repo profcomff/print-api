@@ -1,4 +1,5 @@
 import logging
+import re
 from os.path import abspath, exists
 
 import aiofiles
@@ -6,12 +7,13 @@ from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
+from pydantic import Field, validator
 from sqlalchemy import func, or_
 
 from print_service import __version__
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
-from print_service.schema import ReceiveOutput, SendInput, SendInputUpdate, SendOutput
+from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin
 
@@ -20,6 +22,67 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+# region Schemas
+class PrintOptions(BaseModel):
+    pages: str = Field('', description='Страницы для печати', example='2-4,6')
+    copies: int = Field(1, description='Количество копий для печати')
+    two_sided: bool = Field(False, description='Включить печать с двух сторон листа')
+
+    @validator('pages', pre=True, always=True)
+    def validate_pages(cls, value: str):
+        if not isinstance(value, str):
+            raise ValueError('Value must be str')
+        value = re.sub(r'\s+', '', value)
+        if value == '':
+            return ''
+        value_arr = re.split(r'[-,]', value)
+        if not value_arr == sorted(value_arr) or re.findall(r'[^0-9-,]', value) != []:
+            raise ValueError('Pages must be formated as 2-5,7')
+        if value_arr[0] == '0' or value_arr[0] == '':
+            raise ValueError('Can not print negative and zero pages')
+        return value
+
+
+class SendInput(BaseModel):
+    surname: str = Field(
+        description='Фамилия',
+        example='Иванов',
+    )
+    number: str = Field(
+        description='Номер профсоюзного или студенческого билетов',
+        example='1015000',
+    )
+    filename: str = Field(
+        description='Название файла',
+        example='filename.pdf',
+    )
+    options: PrintOptions = PrintOptions()
+
+
+class SendInputUpdate(BaseModel):
+    options: PrintOptions | None
+
+
+class SendOutput(BaseModel):
+    pin: str = Field(
+        description='Пин-код, который используется для манипуляции файлами',
+        example='OF72I1',
+    )
+    options: PrintOptions
+
+
+class ReceiveOutput(BaseModel):
+    filename: str = Field(
+        description='Название файла, который можно запросить по адресу https://app.profcomff.com/print/static/{filename}',
+        example='2021-11-02-ZMNF5V...9.pdf',
+    )
+    options: PrintOptions
+
+
+# endregion
+
+
+# region handlers
 @router.post(
     '',
     responses={
@@ -35,16 +98,13 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
-    user = (
-        user.filter(
-            or_(
-                func.upper(UnionMember.student_number) == inp.number.upper(),
-                func.upper(UnionMember.union_number) == inp.number.upper(),
-            ),
-            func.upper(UnionMember.surname) == inp.surname.upper(),
-        )
-        .one_or_none()
-    )
+    user = user.filter(
+        or_(
+            func.upper(UnionMember.student_number) == inp.number.upper(),
+            func.upper(UnionMember.union_number) == inp.number.upper(),
+        ),
+        func.upper(UnionMember.surname) == inp.surname.upper(),
+    ).one_or_none()
     if not user:
         raise HTTPException(403, 'User not found in trade union list')
 
@@ -201,3 +261,6 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
             'two_sided': file_model.option_two_sided or False,
         },
     }
+
+
+# endregion

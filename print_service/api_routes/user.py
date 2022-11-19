@@ -108,7 +108,6 @@ def update_list(input: UpdateUserList):
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
-            db.session.flush()
         else:
             db.session.add(
                 UnionMember(
@@ -117,7 +116,7 @@ def update_list(input: UpdateUserList):
                     student_number=user.student_number,
                 )
             )
-            db.session.flush()
+        db.session.flush()
 
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}

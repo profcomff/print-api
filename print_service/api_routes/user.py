@@ -10,14 +10,27 @@ from sqlalchemy import func, or_, and_
 from print_service import __version__
 from print_service.settings import get_settings
 from print_service.models import UnionMember
-from print_service.schema import UpdateUserList
-
+from print_service.schema import BaseModel
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 settings = get_settings()
 
 
+#region schemas
+class UserCreate(BaseModel):
+    username: Optional[str]
+    union_number: Optional[str]
+    student_number: Optional[str]
+
+
+class UpdateUserList(BaseModel):
+    users: List[UserCreate]
+    secret: str
+#endregion
+
+
+#region handlers
 @router.get(
     '/is_union_member',
     status_code=202,
@@ -88,3 +101,4 @@ def update_list(input: UpdateUserList):
 
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
+#endregion

@@ -1,10 +1,10 @@
 import logging
-import secrets
 from typing import List, Optional
 
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from fastapi_sqlalchemy import db
+from pydantic import constr
 from sqlalchemy import func, or_, and_
 
 from print_service import __version__
@@ -17,20 +17,22 @@ router = APIRouter()
 settings = get_settings()
 
 
-#region schemas
+# region schemas
 class UserCreate(BaseModel):
-    username: Optional[str]
-    union_number: Optional[str]
-    student_number: Optional[str]
+    username: constr(strip_whitespace=True, to_upper=True, min_length=1)
+    union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
+    student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
 
 
 class UpdateUserList(BaseModel):
     users: List[UserCreate]
     secret: str
-#endregion
 
 
-#region handlers
+# endregion
+
+
+# region handlers
 @router.get(
     '/is_union_member',
     status_code=202,
@@ -38,17 +40,21 @@ class UpdateUserList(BaseModel):
         404: {'detail': 'User not found'},
     },
 )
-async def check_union_member(surname: str, number: str, v: Optional[str] = __version__):
+async def check_union_member(
+    surname: constr(strip_whitespace=True, to_upper=True, min_length=1),
+    number: constr(strip_whitespace=True, to_upper=True, min_length=1),
+    v: Optional[str] = __version__,
+):
     """Проверяет наличие пользователя в списке."""
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user: UnionMember = user.filter(
         or_(
-            func.upper(UnionMember.student_number) == number.upper(),
-            func.upper(UnionMember.union_number) == number.upper(),
+            func.upper(UnionMember.student_number) == number,
+            func.upper(UnionMember.union_number) == number,
         ),
-        func.upper(UnionMember.surname) == surname.upper(),
+        func.upper(UnionMember.surname) == surname,
     ).one_or_none()
 
     if v == '1':
@@ -73,21 +79,35 @@ def update_list(input: UpdateUserList):
     union_numbers = [user.union_number for user in input.users if user.union_number is not None]
     student_numbers = [user.student_number for user in input.users if user.student_number is not None]
 
-    if len(union_numbers) != len(set(union_numbers)) or len(student_numbers) != len(set(student_numbers)):
-        raise HTTPException(400, {"status": "error", "detail": "Duplicates by union_numbers or student_numbers"})
+    if len(union_numbers) != len(set(union_numbers)) or len(student_numbers) != len(
+        set(student_numbers)
+    ):
+        raise HTTPException(
+            400, {"status": "error", "detail": "Duplicates by union_numbers or student_numbers"}
+        )
 
     for user in input.users:
-        db_user: UnionMember = db.session.query(UnionMember).filter(
-            or_(
-                and_(UnionMember.union_number == user.union_number, UnionMember.union_number != None),
-                and_(UnionMember.student_number == user.student_number, UnionMember.student_number != None),
+        db_user: UnionMember = (
+            db.session.query(UnionMember)
+            .filter(
+                or_(
+                    and_(
+                        UnionMember.union_number == user.union_number,
+                        UnionMember.union_number != None,
+                    ),
+                    and_(
+                        UnionMember.student_number == user.student_number,
+                        UnionMember.student_number != None,
+                    ),
+                )
             )
-        ).one_or_none()
+            .one_or_none()
+        )
 
         if db_user:
-            db_user.surname=user.username
-            db_user.union_number=user.union_number
-            db_user.student_number=user.student_number
+            db_user.surname = user.username
+            db_user.union_number = user.union_number
+            db_user.student_number = user.student_number
             db.session.flush()
         else:
             db.session.add(
@@ -101,4 +121,6 @@ def update_list(input: UpdateUserList):
 
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
-#endregion
+
+
+# endregion

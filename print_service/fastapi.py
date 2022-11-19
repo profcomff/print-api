@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_sqlalchemy import DBSessionMiddleware
 
 from print_service import __version__
-from print_service.api_routes import file_router, user_router
+from print_service.api_routes import file_router, user_router, qrprint_router
 from print_service.settings import Settings, get_settings
 
 
@@ -34,4 +34,5 @@ app.add_middleware(
 
 app.include_router(user_router, prefix='', tags=['User'])
 app.include_router(file_router, prefix='/file', tags=['File'])
+app.include_router(qrprint_router, prefix='/qr', tags=['QR Print'])
 app.mount('/static', StaticFiles(directory='static'), 'static')

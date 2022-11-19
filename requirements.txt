@@ -8,3 +8,4 @@ alembic
 fastapi
 fastapi-sqlalchemy
 python-multipart
+gunicorn

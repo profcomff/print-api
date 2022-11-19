@@ -5,7 +5,7 @@ from unittest.mock import Mock
 from print_service.models import UnionMember, File
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def union_member_user(dbsession):
     union_member = dict(
         id=42,
@@ -18,10 +18,10 @@ def union_member_user(dbsession):
     yield union_member
     db_user = dbsession.query(UnionMember).filter(UnionMember.id == union_member['id']).one_or_none()
     assert db_user is not None
-    dbsession.delete(db_user)
+    dbsession.query(UnionMember).filter(UnionMember.id == union_member['id']).delete()
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def uploaded_file_db(dbsession, union_member_user, client):
     body = {
         "surname": union_member_user['surname'],
@@ -36,7 +36,7 @@ def uploaded_file_db(dbsession, union_member_user, client):
     res = client.post('/file', json=body)
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
     yield db_file
-    dbsession.delete(db_file)
+    dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
 
 
 @pytest.fixture

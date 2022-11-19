@@ -17,7 +17,5 @@ def client():
 def dbsession() -> Session:
     settings = Settings()
     engine = create_engine(settings.DB_DSN)
-    TestingSessionLocal = sessionmaker(autocommit=True, autoflush=False, bind=engine)
-    Model.metadata.create_all(bind=engine)
+    TestingSessionLocal = sessionmaker(autocommit=True, autoflush=True, bind=engine)
     yield TestingSessionLocal()
-    Model.metadata.drop_all(bind=engine)

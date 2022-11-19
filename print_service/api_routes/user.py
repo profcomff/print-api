@@ -40,10 +40,10 @@ class UpdateUserList(BaseModel):
 )
 async def check_union_member(surname: str, number: str, v: Optional[str] = __version__):
     """Проверяет наличие пользователя в списке."""
-    user: UnionMember = db.session.query(UnionMember)
+    user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
-    user = user.filter(
+    user: UnionMember = user.filter(
         or_(
             func.upper(UnionMember.student_number) == number.upper(),
             func.upper(UnionMember.union_number) == number.upper(),

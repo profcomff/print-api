@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-#region Schemas
+# region Schemas
 class PrintOptions(BaseModel):
     pages: str = Field('', description='Страницы для печати', example='2-4,6')
     copies: int = Field(1, description='Количество копий для печати')
@@ -77,10 +77,12 @@ class ReceiveOutput(BaseModel):
         example='2021-11-02-ZMNF5V...9.pdf',
     )
     options: PrintOptions
-#endregion
 
 
-#region handlers
+# endregion
+
+
+# region handlers
 @router.post(
     '',
     responses={
@@ -96,16 +98,13 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
-    user = (
-        user.filter(
-            or_(
-                func.upper(UnionMember.student_number) == inp.number.upper(),
-                func.upper(UnionMember.union_number) == inp.number.upper(),
-            ),
-            func.upper(UnionMember.surname) == inp.surname.upper(),
-        )
-        .one_or_none()
-    )
+    user = user.filter(
+        or_(
+            func.upper(UnionMember.student_number) == inp.number.upper(),
+            func.upper(UnionMember.union_number) == inp.number.upper(),
+        ),
+        func.upper(UnionMember.surname) == inp.surname.upper(),
+    ).one_or_none()
     if not user:
         raise HTTPException(403, 'User not found in trade union list')
 
@@ -262,4 +261,6 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
             'two_sided': file_model.option_two_sided or False,
         },
     }
-#endregion
+
+
+# endregion

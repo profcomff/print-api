@@ -27,11 +27,7 @@ def uploaded_file_db(dbsession, union_member_user, client):
         "surname": union_member_user['surname'],
         "number": union_member_user['union_number'],
         "filename": "filename.pdf",
-        "options": {
-            "pages": "",
-            "copies": 1,
-            "two_sided": False
-        }
+        "options": {"pages": "", "copies": 1, "two_sided": False},
     }
     res = client.post('/file', json=body)
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
@@ -45,5 +41,3 @@ def uploaded_file_os(uploaded_file_db):
         file.write('\n')
     yield uploaded_file_db
     os.remove(f'static/{uploaded_file_db.file}')
-
-

@@ -1,7 +1,7 @@
 import random
 import re
 from datetime import date, datetime, timedelta
-
+import PIL.Image
 from sqlalchemy.orm.session import Session
 
 from print_service.models import File
@@ -33,3 +33,10 @@ def generate_filename(original_filename: str):
     salt = ''.join(random.choice(settings.PIN_SYMBOLS) for i in range(128))
     ext = re.findall(r'\w+', original_filename.split('.')[-1])[0]
     return f'{datestr}-{salt}.{ext}'
+
+
+#преобразует файл из картинки в pdf
+def process_image(filepath,newFileName):
+	with PIL.Image.open(filepath).convert("RGB") as image:
+		print(image.mode)
+		image.save(newFileName, "PDF", quality=100)

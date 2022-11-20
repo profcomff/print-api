@@ -1,5 +1,6 @@
 import logging
 from os.path import abspath, exists
+from os import remove
 
 import aiofiles
 from fastapi import APIRouter, File, UploadFile
@@ -14,7 +15,7 @@ from print_service.models import UnionMember
 from print_service.schema import ReceiveOutput, SendInput, SendInputUpdate, SendOutput
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin
-
+from print_service.utils import process_image
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -116,6 +117,17 @@ async def upload_file(
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
     await file.close()
+    #надо конвертировать картинку. Нельзя отправлять ответ что все готово до завершения этого, а то клиент может попросить распечатать еще не готовый файл
+    #проверка на то, чтобы не конвертировать pdf в pdf
+    fileFormat="pdf"
+    if(file.content_type=="image/png"):
+        fileFormat="png"
+    if(file.content_type=="image/jpeg"):
+        fileFormat="jpg"
+    if(fileFormat!="pdf"):
+        process_image(path,path.replace(fileFormat,"pdf"))
+        remove(path)# удаляем старый файл - картинку
+
 
     return {
         'pin': pin,

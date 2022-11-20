@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str 
 
-    CONTENT_TYPES: List[str] = ['application/pdf']
+    CONTENT_TYPES: List[str] = ['application/pdf','image/png','image/jpeg']
     MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
     STATIC_FOLDER: str = './static'

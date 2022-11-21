@@ -54,7 +54,6 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     except RuntimeError:
         raise HTTPException(500, 'Can not generate PIN. Too many users?')
     filename = generate_filename(inp.filename)
-
     file_model = FileModel(pin=pin, file=filename)
     file_model.owner = user
     file_model.option_copies = inp.options.copies
@@ -200,11 +199,14 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
     )
     if not file_model:
         raise HTTPException(404, f'Pin {pin} not found')
+    #если файл был конвертирован ранее, то он уже лежит как пфд
+    file_model.file=file_model.file.replace(".png",".pdf")
+    file_model.filename=file_model.file.replace(".jpg",".pdf")
+    
 
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if not exists(path):
-        raise HTTPException(415, 'File has not uploaded yet')
-
+        raise HTTPException(415, 'File has not uploaded yet'+ file_model.file)
     return {
         'filename': file_model.file,
         'options': {

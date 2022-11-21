@@ -37,6 +37,9 @@ def generate_filename(original_filename: str):
 
 #преобразует файл из картинки в pdf
 def process_image(filepath,newFileName):
-	with PIL.Image.open(filepath).convert("RGB") as image:
-		print(image.mode)
-		image.save(newFileName, "PDF", quality=100)
+    with PIL.Image.open(filepath).convert("RGB") as image:
+        width, height = image.size
+        if(width<height):
+            image=image.rotate(90,expand=True)
+        image.save(newFileName, "PDF", quality=100)
+        

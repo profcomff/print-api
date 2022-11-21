@@ -8,7 +8,7 @@ from pydantic.networks import HttpUrl, PostgresDsn
 
 class Settings(BaseSettings):
     ROOT: Optional[HttpUrl] = None
-    DB_DSN: PostgresDsn = 'postgresql://postgres:1234@localhost:5432/postgres'
+    DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
 
     SECRET_KEY: str 
 

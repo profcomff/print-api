@@ -206,7 +206,7 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
 
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if not exists(path):
-        raise HTTPException(415, 'File has not uploaded yet'+ file_model.file)
+        raise HTTPException(415, 'File has not uploaded yet')
     return {
         'filename': file_model.file,
         'options': {

@@ -25,4 +25,3 @@ static/**
 .venv/
 .wheels/
 .core
-.vscode/launch.json

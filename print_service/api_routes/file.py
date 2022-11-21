@@ -126,6 +126,9 @@ async def upload_file(
     if(fileFormat!="pdf"):
         process_image(path,path.replace(fileFormat,"pdf"))
         remove(path)# удаляем старый файл - картинку
+        file_model.file=file_model.file.replace(fileFormat,"pdf")#обновить имя в бд, чтобы не сломать печать 
+        db.session.commit()
+
 
 
     return {
@@ -199,9 +202,6 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
     )
     if not file_model:
         raise HTTPException(404, f'Pin {pin} not found')
-    #если файл был конвертирован ранее, то он уже лежит как пфд
-    file_model.file=file_model.file.replace(".png",".pdf")
-    file_model.filename=file_model.file.replace(".jpg",".pdf")
     
 
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file

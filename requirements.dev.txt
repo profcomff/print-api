@@ -1,0 +1,7 @@
+pydocstyle
+black
+isort
+pytest
+requests
+httpx
+pytest-cov

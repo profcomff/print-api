@@ -1,7 +1,6 @@
 import logging
 import re
-from os.path import abspath, exists
-from os import remove
+from os.path import abspath, exists, splitext
 
 import aiofiles
 from fastapi import APIRouter, File, UploadFile, BackgroundTasks
@@ -16,8 +15,7 @@ from print_service.models import File as FileModel
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from print_service.utils import generate_filename, generate_pin
-from print_service.utils import process_image
+from print_service.utils import generate_filename, generate_pin, process_image
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

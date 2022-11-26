@@ -1,9 +1,9 @@
 import logging
-from os.path import abspath, exists
+from os.path import abspath, exists, splitext
 from os import remove
 
 import aiofiles
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, UploadFile, BackgroundTasks
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
@@ -81,7 +81,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     response_model=SendOutput,
 )
 async def upload_file(
-    pin: str, file: UploadFile = File(...), settings: Settings = Depends(get_settings)
+    pin: str,  background_tasks: BackgroundTasks, file: UploadFile = File(...), settings: Settings = Depends(get_settings)
 ):
     """Загрузить файл на сервер.
 
@@ -109,24 +109,23 @@ async def upload_file(
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if exists(path):
         raise HTTPException(415, 'File already uploaded')
-
-    async with aiofiles.open(path, 'wb') as saved_file:
+    fileName,extension=splitext(path)#[0] - путь + имя, [1] - расширение
+    extension=extension.lower()
+    #если это пдф, то как обычно сохраняем
+    if(extension==".pdf"):
+        async with aiofiles.open(path, 'wb') as saved_file:
+            memory_file = await file.read()
+            if len(memory_file) > settings.MAX_SIZE:
+                raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
+            await saved_file.write(memory_file)
+        await file.close()
+    if(extension in [".png",".jpg"]):
         memory_file = await file.read()
         if len(memory_file) > settings.MAX_SIZE:
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
-        await saved_file.write(memory_file)
-    await file.close()
-    #надо конвертировать картинку. Нельзя отправлять ответ что все готово до завершения этого, а то клиент может попросить распечатать еще не готовый файл
-    #проверка на то, чтобы не конвертировать pdf в pdf
-    fileFormat="pdf"
-    if(file.content_type=="image/png"):
-        fileFormat="png"
-    if(file.content_type=="image/jpeg"):
-        fileFormat="jpg"
-    if(fileFormat!="pdf"):
-        process_image(path,path.replace(fileFormat,"pdf"))
-        remove(path)# удаляем старый файл - картинку
-        file_model.file=file_model.file.replace(fileFormat,"pdf")#обновить имя в бд, чтобы не сломать печать 
+        background_tasks.add_task (process_image,memory_file,fileName) #сама конвертация в фоне, .pdf поставит функция 
+        #process_image(memory_file,fileName)#.pdf поставит функция 
+        file_model.file=f"{splitext(file_model.file)[0]}.pdf"#обновить имя в бд, чтобы не сломать печать 
         db.session.commit()
 
 

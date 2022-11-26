@@ -7,6 +7,10 @@ from sqlalchemy.orm.session import Session
 from print_service.models import File
 from print_service.settings import Settings, get_settings
 
+from os import remove
+import time
+from io import BytesIO
+
 
 settings: Settings = get_settings()
 
@@ -36,10 +40,10 @@ def generate_filename(original_filename: str):
 
 
 #преобразует файл из картинки в pdf
-def process_image(filepath,newFileName):
-    with PIL.Image.open(filepath).convert("RGB") as image:
-        width, height = image.size
-        if(width<height):
-            image=image.rotate(90,expand=True)
-        image.save(newFileName, "PDF", quality=100)
+def process_image(file,newFileName):
+    image=PIL.Image.open(BytesIO(file)).convert("RGB")  
+    if(image.width<image.height):
+        image=image.rotate(90,expand=True)
+    image.save(f"{newFileName}.pdf", "PDF", quality=100)
+    #remove(filepath)# удаляем старый файл - картинку
         

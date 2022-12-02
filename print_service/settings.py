@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     ROOT: Optional[HttpUrl] = None
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
 
-    SECRET_KEY: Optional[str]
+    SECRET_KEY: Optional[str] = '42'
 
     CONTENT_TYPES: List[str] = ['application/pdf']
     MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах

@@ -215,7 +215,7 @@ async def update_file_options(
     file_model.option_copies = options.get('copies') or file_model.option_copies
     file_model.option_two_sided = options.get('two_sided') or file_model.option_two_sided
     db.session.commit()
-    return {
+    return  {
         'pin': file_model.pin,
         'options': {
             'pages': file_model.option_pages,

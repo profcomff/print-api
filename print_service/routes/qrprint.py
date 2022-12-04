@@ -1,0 +1,108 @@
+import json
+import logging
+import random
+from datetime import datetime, timedelta
+from websockets.exceptions import ConnectionClosed
+from asyncio import sleep
+
+from fastapi import APIRouter, Header, WebSocket
+from redis import Redis
+
+from print_service.schema import BaseModel
+from print_service.settings import get_settings, Settings
+
+from pydantic import conlist
+
+
+logger = logging.getLogger(__name__)
+settings: Settings = get_settings()
+router = APIRouter()
+
+
+class InstantPrintCreate(BaseModel):
+    qr_token: str
+    files: conlist(str, min_items=1, max_items=10, unique_items=True)
+
+
+class InstantPrintSender:
+    def __init__(self, settings: Settings = None) -> None:
+        settings = settings or get_settings()
+        self.redis: Redis = Redis.from_url(settings.REDIS_DSN)
+
+    def send(self, qr_token: str, files: list[str]):
+        terminal = self.redis.get(qr_token)
+        if not terminal:
+            return None
+        self.redis.delete(qr_token)
+        old = self.redis.get(terminal)
+        if old:
+            return None
+        self.redis.set(terminal, json.dumps({'files': files}))
+        return files
+
+
+class InstantPrintFetcher:
+    def __init__(self, terminal_token: str, settings: Settings = None) -> None:
+        self.terminal_token = terminal_token
+        settings = settings or get_settings()
+        self.redis = Redis.from_url(settings.REDIS_DSN)
+        self.ttl = settings.QR_TOKEN_TTL
+        self.delay = settings.QR_TOKEN_DELAY
+        self.symbols = settings.QR_TOKEN_SYMBOLS
+        self.length = settings.QR_TOKEN_LENGTH
+
+    def new_qr(self):
+        for _ in range(5):
+            qr_token = ''.join(random.choice(self.symbols) for _ in range(self.length))
+            if not self.redis.get(qr_token):  # If this qr already exists, generate new
+                break
+        self.redis.set(qr_token, self.terminal_token, ex=self.ttl+self.delay)  # Send token to redis +ttl
+        return qr_token
+
+    async def get_tasks(self) -> dict[str, list[str]]:
+        until = datetime.utcnow() + timedelta(seconds=self.ttl)
+        while datetime.utcnow() < until:
+            raw_value: bytes = self.redis.get(self.terminal_token)
+            if raw_value:
+                self.redis.delete(self.terminal_token)
+                break
+            await sleep(0.5)
+        else:
+            return {}
+        return json.loads(raw_value)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        value = await self.get_tasks()
+        qr_token = self.new_qr()
+        result = {"qr_token": qr_token, **value}
+        return result
+
+
+redis_conn = InstantPrintSender()
+
+
+@router.post("")
+async def instant_print(options: InstantPrintCreate):
+    options.qr_token = options.qr_token.removeprefix(settings.QR_TOKEN_PREFIX)
+    if redis_conn.send(**options.dict()):
+        return {'status': 'ok'}
+    return {'status': 'fail'}
+
+
+@router.websocket("")
+async def websocket_endpoint(
+    websocket: WebSocket,
+    authorization: str = Header(),
+):
+    await websocket.accept()
+    try:
+        manager = InstantPrintFetcher(authorization.removeprefix("token "))
+        await websocket.send_text(json.dumps({"qr_token": settings.QR_TOKEN_PREFIX + manager.new_qr()}))
+        async for task in manager:
+            task['qr_token'] = settings.QR_TOKEN_PREFIX + task['qr_token']
+            await websocket.send_text(json.dumps(task))
+    except (ConnectionClosed, KeyboardInterrupt):
+        websocket.close()

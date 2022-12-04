@@ -73,7 +73,19 @@ jobs:
             --name ${{ env.CONTAITER_NAME }}_migration \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test \
             alembic upgrade head
-      - name: Run new version
+
+      - name: Run test redis
+        id: run_test_redis
+        run: |
+          docker stop ${{ env.CONTAITER_NAME }}_redis || true && docker rm ${{ env.CONTAITER_NAME }}_redis || true
+          docker run \
+            --detach \
+            --restart on-failure:3 \
+            --network=com_profcomff_api_printer_test_network \
+            --name ${{ env.CONTAITER_NAME }}_redis \
+            redis:7
+
+      - name: Run test version
         id: run_test
         run: |
           docker stop ${{ env.CONTAITER_NAME }} || true && docker rm ${{ env.CONTAITER_NAME }} || true
@@ -83,13 +95,15 @@ jobs:
             --network=web \
             --volume com_profcomff_api_printer_test_static:/app/static \
             --env DB_DSN=${{ secrets.DB_DSN }} \
+            --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
             --env ALLOW_STUDENT_NUMBER=true \
-            --env STATIC_PATH=/app/static \
+            --env STATIC_FOLDER=/app/static \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
+          docker network connect com_profcomff_api_printer_test_network ${{ env.CONTAITER_NAME }}
 
 
   deploy-production:
@@ -120,8 +134,19 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             alembic upgrade head
 
-      - name: Run new version
-        id: run_test
+      - name: Run prod redis
+        id: run_prod_redis
+        run: |
+          docker stop ${{ env.CONTAITER_NAME }}_redis || true && docker rm ${{ env.CONTAITER_NAME }}_redis || true
+          docker run \
+            --detach \
+            --restart always \
+            --network=com_profcomff_api_printer_network \
+            --name ${{ env.CONTAITER_NAME }}_redis \
+            redis:7
+
+      - name: Run prod version
+        id: run_prod
         run: |
           docker stop ${{ env.CONTAITER_NAME }} || true && docker rm ${{ env.CONTAITER_NAME }} || true
           docker run \
@@ -130,10 +155,12 @@ jobs:
             --network=web \
             --volume com_profcomff_api_printer_static:/app/static \
             --env DB_DSN='${{ secrets.DB_DSN }}' \
+            --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
             --env ALLOW_STUDENT_NUMBER=true \
-            --env STATIC_PATH=/app/static \
+            --env STATIC_FOLDER=/app/static \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker network connect com_profcomff_api_printer_network ${{ env.CONTAITER_NAME }}

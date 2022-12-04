@@ -4,12 +4,14 @@ import random
 from asyncio import sleep
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Header, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Header, WebSocket, HTTPException
+from fastapi_sqlalchemy import db
 from pydantic import conlist
 from redis import Redis
 
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
+from print_service.utils import get_file
 
 
 logger = logging.getLogger(__name__)
@@ -35,6 +37,7 @@ class InstantPrintSender:
         old = self.redis.get(terminal)
         if old:
             return None
+        files = get_file(db.session, files)
         self.redis.set(terminal, json.dumps({'files': files}))
         return files
 
@@ -87,7 +90,7 @@ async def instant_print(options: InstantPrintCreate):
     options.qr_token = options.qr_token.removeprefix(settings.QR_TOKEN_PREFIX)
     if redis_conn.send(**options.dict()):
         return {'status': 'ok'}
-    return {'status': 'fail'}
+    raise HTTPException(400, 'Terminal not found by qr')
 
 
 @router.websocket("")

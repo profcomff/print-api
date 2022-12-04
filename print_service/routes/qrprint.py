@@ -94,7 +94,7 @@ async def instant_print(options: InstantPrintCreate):
 
 
 @router.websocket("")
-async def websocket_endpoint(
+async def instant_print_terminal_connection(
     websocket: WebSocket,
     authorization: str = Header(),
 ):

@@ -19,6 +19,7 @@ def union_member_user(dbsession):
     db_user = dbsession.query(UnionMember).filter(UnionMember.id == union_member['id']).one_or_none()
     assert db_user is not None
     dbsession.query(UnionMember).filter(UnionMember.id == union_member['id']).delete()
+    dbsession.commit()
 
 
 @pytest.fixture(scope='function')
@@ -33,6 +34,7 @@ def uploaded_file_db(dbsession, union_member_user, client):
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
     yield db_file
     dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
+    dbsession.commit()
 
 
 @pytest.fixture

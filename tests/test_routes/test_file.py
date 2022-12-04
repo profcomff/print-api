@@ -6,6 +6,7 @@ import json
 
 url = '/file'
 settings = get_settings()
+settings.STATIC_FOLDER = './static'
 
 
 def test_post_success(union_member_user, client, dbsession):

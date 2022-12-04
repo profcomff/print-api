@@ -1,5 +1,4 @@
 aiofiles
-click
 pydantic[dotenv]
 uvicorn
 sqlalchemy

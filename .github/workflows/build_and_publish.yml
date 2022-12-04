@@ -73,7 +73,19 @@ jobs:
             --name ${{ env.CONTAITER_NAME }}_migration \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test \
             alembic upgrade head
-      - name: Run new version
+            
+      - name: Run test redis
+        id: run_test_redis
+        run: |
+          docker stop ${{ env.CONTAITER_NAME }}_redis || true && docker rm ${{ env.CONTAITER_NAME }}_redis || true
+          docker run \
+            --detach \
+            --restart on-failure:3 \
+            --network=com_profcomff_api_printer_test_network \
+            --name ${{ env.CONTAITER_NAME }}_redis \
+            redis:7
+            
+      - name: Run test version
         id: run_test
         run: |
           docker stop ${{ env.CONTAITER_NAME }} || true && docker rm ${{ env.CONTAITER_NAME }} || true
@@ -81,8 +93,10 @@ jobs:
             --detach \
             --restart on-failure:3 \
             --network=web \
+            --network=com_profcomff_api_printer_test_network \
             --volume com_profcomff_api_printer_test_static:/app/static \
             --env DB_DSN=${{ secrets.DB_DSN }} \
+            --env REDIS_DSN='${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
@@ -120,16 +134,29 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             alembic upgrade head
 
-      - name: Run new version
-        id: run_test
+      - name: Run prod redis
+        id: run_prod_redis
+        run: |
+          docker stop ${{ env.CONTAITER_NAME }}_redis || true && docker rm ${{ env.CONTAITER_NAME }}_redis || true
+          docker run \
+            --detach \
+            --restart always \
+            --network=com_profcomff_api_printer_network \
+            --name ${{ env.CONTAITER_NAME }}_redis \
+            redis:7
+            
+      - name: Run prod version
+        id: run_prod
         run: |
           docker stop ${{ env.CONTAITER_NAME }} || true && docker rm ${{ env.CONTAITER_NAME }} || true
           docker run \
             --detach \
             --restart always \
             --network=web \
+            --network=com_profcomff_api_printer_network \
             --volume com_profcomff_api_printer_static:/app/static \
             --env DB_DSN='${{ secrets.DB_DSN }}' \
+            --env REDIS_DSN='${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \

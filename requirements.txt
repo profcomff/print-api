@@ -8,3 +8,5 @@ fastapi
 fastapi-sqlalchemy
 python-multipart
 gunicorn
+websockets
+redis

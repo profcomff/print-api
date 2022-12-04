@@ -15,7 +15,7 @@ from print_service.models import File as FileModel
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from print_service.utils import generate_filename, generate_pin
+from print_service.utils import generate_filename, generate_pin, get_file
 
 
 logger = logging.getLogger(__name__)
@@ -240,27 +240,7 @@ async def print_file(pin: str, settings: Settings = Depends(get_settings)):
     бесконечное количество раз в течение 7 дней после загрузки (меняется в
     настройках сервера).
     """
-    file_model = (
-        db.session.query(FileModel)
-        .filter(func.upper(FileModel.pin) == pin.upper())
-        .order_by(FileModel.created_at.desc())
-        .one_or_none()
-    )
-    if not file_model:
-        raise HTTPException(404, f'Pin {pin} not found')
-
-    path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
-    if not exists(path):
-        raise HTTPException(415, 'File has not uploaded yet')
-
-    return {
-        'filename': file_model.file,
-        'options': {
-            'pages': file_model.option_pages or '',
-            'copies': file_model.option_copies or 1,
-            'two_sided': file_model.option_two_sided or False,
-        },
-    }
+    return get_file(db.session, pin)[0]
 
 
 # endregion

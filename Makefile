@@ -1,5 +1,5 @@
 run:
-	source ./venv/bin/activate && uvicorn --reload --log-level debug print_service.fastapi:app
+	source ./venv/bin/activate && uvicorn --reload --log-level debug print_service.routes:app
 
 db:
 	docker run -d -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name db-print_service postgres:15

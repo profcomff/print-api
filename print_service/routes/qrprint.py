@@ -1,17 +1,15 @@
 import json
 import logging
 import random
-from datetime import datetime, timedelta
-from websockets.exceptions import ConnectionClosed
 from asyncio import sleep
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Header, WebSocket
+from fastapi import APIRouter, Header, WebSocket, WebSocketDisconnect
+from pydantic import conlist
 from redis import Redis
 
 from print_service.schema import BaseModel
-from print_service.settings import get_settings, Settings
-
-from pydantic import conlist
+from print_service.settings import Settings, get_settings
 
 
 logger = logging.getLogger(__name__)
@@ -98,11 +96,8 @@ async def websocket_endpoint(
     authorization: str = Header(),
 ):
     await websocket.accept()
-    try:
-        manager = InstantPrintFetcher(authorization.removeprefix("token "))
-        await websocket.send_text(json.dumps({"qr_token": settings.QR_TOKEN_PREFIX + manager.new_qr()}))
-        async for task in manager:
-            task['qr_token'] = settings.QR_TOKEN_PREFIX + task['qr_token']
-            await websocket.send_text(json.dumps(task))
-    except (ConnectionClosed, KeyboardInterrupt):
-        websocket.close()
+    manager = InstantPrintFetcher(authorization.removeprefix("token "))
+    await websocket.send_text(json.dumps({"qr_token": settings.QR_TOKEN_PREFIX + manager.new_qr()}))
+    async for task in manager:
+        task['qr_token'] = settings.QR_TOKEN_PREFIX + task['qr_token']
+        await websocket.send_text(json.dumps(task))

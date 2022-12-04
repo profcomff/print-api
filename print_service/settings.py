@@ -6,7 +6,6 @@ from pydantic import BaseSettings, DirectoryPath, HttpUrl, PostgresDsn
 
 
 class Settings(BaseSettings):
-    ROOT: Optional[HttpUrl] = None
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
 
     SECRET_KEY: Optional[str] = '42'

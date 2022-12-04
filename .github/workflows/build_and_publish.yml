@@ -46,6 +46,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+
   deploy-testing:
     name: Deploy Testing
     needs: build-and-push-image
@@ -67,6 +68,7 @@ jobs:
           docker run \
             --rm \
             --network=web \
+            --workdir="/" \
             --env DB_DSN=${{ secrets.DB_DSN }} \
             --name ${{ env.CONTAITER_NAME }}_migration \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test \
@@ -82,12 +84,14 @@ jobs:
             --volume com_profcomff_api_printer_test_static:/app/static \
             --env DB_DSN=${{ secrets.DB_DSN }} \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
-            --env ROOT=https://printer.api.test.profcomff.com/ \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
             --env ALLOW_STUDENT_NUMBER=true \
+            --env STATIC_PATH=/app/static \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
+
+
   deploy-production:
     name: Deploy Production
     needs: build-and-push-image
@@ -110,10 +114,12 @@ jobs:
           docker run \
             --rm \
             --network=web \
+            --workdir="/" \
             --env DB_DSN=${{ secrets.DB_DSN }} \
             --name ${{ env.CONTAITER_NAME }}_migration \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             alembic upgrade head
+
       - name: Run new version
         id: run_test
         run: |
@@ -125,9 +131,9 @@ jobs:
             --volume com_profcomff_api_printer_static:/app/static \
             --env DB_DSN='${{ secrets.DB_DSN }}' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
-            --env ROOT=https://printer.api.profcomff.com/ \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
             --env ALLOW_STUDENT_NUMBER=true \
+            --env STATIC_PATH=/app/static \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

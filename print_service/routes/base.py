@@ -6,7 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_sqlalchemy import DBSessionMiddleware
 
 from print_service import __version__
-from print_service.api_routes import file_router, user_router
+from print_service.routes.file import router as file_router
+from print_service.routes.user import router as user_router
 from print_service.settings import Settings, get_settings
 
 

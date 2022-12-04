@@ -1,4 +1,4 @@
-from print_service.fastapi import app
+from print_service.routes import app
 from print_service.settings import Settings
 from print_service.models import Model
 import pytest

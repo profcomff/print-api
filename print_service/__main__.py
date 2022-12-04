@@ -1,8 +1,6 @@
-import logging
-import sys
-
-import print_service
-from print_service.cli import main
+from print_service.routes.base import app
+import uvicorn
 
 
-sys.exit(main(obj={}))
+if __name__ == '__main__':
+    uvicorn.run(app)

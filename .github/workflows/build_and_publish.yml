@@ -99,6 +99,7 @@ jobs:
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
+            --env QR_TOKEN_PREFIX='https://printer.ui.test.profcomff.com#' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
             --name ${{ env.CONTAITER_NAME }} \
@@ -159,6 +160,7 @@ jobs:
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
+            --env QR_TOKEN_PREFIX='https://app.profcomff.com/apps#' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
             --name ${{ env.CONTAITER_NAME }} \

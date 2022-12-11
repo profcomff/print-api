@@ -27,6 +27,10 @@ class UpdateInput(AdminAuth):
     terminal_token: str
 
 
+class RebootInput(AdminAuth):
+    terminal_token: str
+
+
 class InstantCommandSender:
     def __init__(self, settings: Settings = None) -> None:
         settings = settings or get_settings()
@@ -39,6 +43,13 @@ class InstantCommandSender:
         self.redis.set(terminal_token, json.dumps({'manual_update': True}))
         return True
 
+    def reboot(self, terminal_token: str):
+        terminal = self.redis.get(terminal_token)
+        if terminal:
+            return None
+        self.redis.set(terminal_token, json.dumps({'reboot': True}))
+        return True
+
 
 @router.post("/update")
 async def manual_update_terminal(input: UpdateInput):
@@ -46,6 +57,18 @@ async def manual_update_terminal(input: UpdateInput):
         raise HTTPException(403, {"status": "error", "detail": "Incorrect secret"})
     sender = InstantCommandSender()
     if sender.update(input.terminal_token):
+        sender.redis.close()
+        return {'status': 'ok'}
+    sender.redis.close()
+    raise HTTPException(400, 'Terminal not found by token')
+
+
+@router.post("/reboot")
+async def reboot_terminal(input: RebootInput):
+    if input.secret != settings.SECRET_KEY:
+        raise HTTPException(403, {"status": "error", "detail": "Incorrect secret"})
+    sender = InstantCommandSender()
+    if sender.reboot(input.terminal_token):
         sender.redis.close()
         return {'status': 'ok'}
     sender.redis.close()

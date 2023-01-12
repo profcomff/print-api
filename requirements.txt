@@ -10,3 +10,4 @@ fastapi-sqlalchemy
 python-multipart
 Pillow
 gunicorn
+fpdf2

@@ -44,11 +44,37 @@ def uploaded_file_os(uploaded_file_db):
 
 
 @pytest.fixture
-def pin(dbsession, union_member_user, client):
+def pinPdf(dbsession, union_member_user, client):
     body = {
         "surname": union_member_user['surname'],
         "number": union_member_user['union_number'],
         "filename": "tets.pdf",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    res = client.post('/file', json=body)
+    pin = res.json()['pin']
+    yield pin
+    dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
+
+@pytest.fixture
+def pinPng(dbsession, union_member_user, client):
+    body = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "tets.png",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    res = client.post('/file', json=body)
+    pin = res.json()['pin']
+    yield pin
+    dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
+
+@pytest.fixture
+def pinJpg(dbsession, union_member_user, client):
+    body = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "tets.jpg",
         "options": {"pages": "", "copies": 1, "two_sided": False},
     }
     res = client.post('/file', json=body)

@@ -34,6 +34,7 @@ def generate_filename(original_filename: str):
     datestr = date.today().isoformat()
     salt = ''.join(random.choice(settings.PIN_SYMBOLS) for i in range(128))
     ext = splitext(original_filename)[1]
+    ext.replace(".","")#при загрузке из тестов появляется лишняя точка
     return f'{datestr}-{salt}.{ext}'
 
 

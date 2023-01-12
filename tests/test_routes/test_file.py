@@ -47,8 +47,8 @@ def test_get_file_wrong_pin(uploaded_file_os, client):
     res = client.get(f"{url}/{uploaded_file_os.pin}test404")
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
-def test_upload_and_print_pdf(pin,client):
-    print(pin)
+def test_upload_and_print_pdf(pinPdf,client):
+    pin=pinPdf
     fileName = 'tests/test_routes/test_files/test.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
@@ -57,8 +57,8 @@ def test_upload_and_print_pdf(pin,client):
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_200_OK
 
-def test_upload_and_print_jpg(pin,client):
-    print(pin)
+def test_upload_and_print_jpg(pinJpg,client):
+    pin=pinJpg
     fileName = 'tests/test_routes/test_files/test.jpg'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"image/jpeg")}
     res = client.post(f"{url}/{pin}", files=files)
@@ -69,8 +69,8 @@ def test_upload_and_print_jpg(pin,client):
 
 
 
-def test_upload_and_print_png(pin,client):
-    print(pin)
+def test_upload_and_print_png(pinPng,client):
+    pin=pinPng
     fileName = 'tests/test_routes/test_files/test.png'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"image/png")}
     res = client.post(f"{url}/{pin}", files=files)

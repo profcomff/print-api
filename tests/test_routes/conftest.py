@@ -41,3 +41,17 @@ def uploaded_file_os(uploaded_file_db):
         file.write('\n')
     yield uploaded_file_db
     os.remove(f'static/{uploaded_file_db.file}')
+
+
+@pytest.fixture
+def pin(dbsession, union_member_user, client):
+    body = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "tets.pdf",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    res = client.post('/file', json=body)
+    pin = res.json()['pin']
+    yield pin
+    dbsession.query(File).filter(File.pin == res.json()['pin']).delete()

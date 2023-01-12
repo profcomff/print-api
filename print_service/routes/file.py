@@ -213,7 +213,7 @@ async def update_file_options(
         raise HTTPException(404, f'Pin {pin} not found')
     file_model.option_pages = options.get('pages') or file_model.option_pages
     file_model.option_copies = options.get('copies') or file_model.option_copies
-    file_model.option_two_sided = options.get('two_sided') or file_model.option_two_sided
+    file_model.option_two_sided = v if (v := options.get('two_sided')) is not None else file_model.option_two_sided
     db.session.commit()
     return {
         'pin': file_model.pin,

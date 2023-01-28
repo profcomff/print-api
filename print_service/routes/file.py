@@ -10,13 +10,11 @@ from fastapi_sqlalchemy import db
 from pydantic import Field, validator
 from sqlalchemy import func, or_
 
-from print_service import __version__
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin, get_file
-
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -104,16 +102,15 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
             func.upper(UnionMember.union_number) == inp.number.upper(),
         ),
         func.upper(UnionMember.surname) == inp.surname.upper(),
-    ).one_or_none()
+    )
+    user = user.one_or_none()
     if not user:
         raise HTTPException(403, 'User not found in trade union list')
-
     try:
         pin = generate_pin(db.session)
     except RuntimeError:
         raise HTTPException(500, 'Can not generate PIN. Too many users?')
     filename = generate_filename(inp.filename)
-
     file_model = FileModel(pin=pin, file=filename)
     file_model.owner = user
     file_model.option_copies = inp.options.copies

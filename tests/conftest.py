@@ -1,10 +1,10 @@
-from print_service.routes import app
-from print_service.settings import Settings
-from print_service.models import Model
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+
+from print_service.routes import app
+from print_service.settings import Settings
 
 
 @pytest.fixture(scope='session')
@@ -16,6 +16,6 @@ def client():
 @pytest.fixture(scope='session')
 def dbsession() -> Session:
     settings = Settings()
-    engine = create_engine(settings.DB_DSN)
-    TestingSessionLocal = sessionmaker(autocommit=True, autoflush=True, bind=engine)
+    engine = create_engine(settings.DB_DSN, pool_pre_ping=True)
+    TestingSessionLocal = sessionmaker(bind=engine)
     yield TestingSessionLocal()

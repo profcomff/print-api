@@ -1,18 +1,11 @@
 import json
 import logging
-import random
-from asyncio import sleep
-from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Header, WebSocket, HTTPException
-from fastapi_sqlalchemy import db
-from pydantic import conlist
+from fastapi import APIRouter, HTTPException
 from redis import Redis
 
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from print_service.utils import get_file
-
 
 logger = logging.getLogger(__name__)
 settings: Settings = get_settings()

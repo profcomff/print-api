@@ -32,7 +32,6 @@ def uploaded_file_db(dbsession, union_member_user, client):
     }
     res = client.post('/file', json=body)
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
-    dbsession.flush()
     yield db_file
     dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
     dbsession.commit()

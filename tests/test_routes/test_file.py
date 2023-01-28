@@ -26,6 +26,7 @@ def test_post_success(union_member_user, client, dbsession):
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
     assert db_file is not None
     dbsession.delete(db_file)
+    dbsession.commit()
 
 
 def test_post_unauthorized_user(client):
@@ -57,11 +58,13 @@ def test_get_file_wrong_pin(uploaded_file_os, client):
 def test_get_file_func_1_not_exists(dbsession):
     with pytest.raises(HTTPException):
         get_file(dbsession, ['1'])
+    dbsession.commit()
 
 
 def test_get_file_func_1_not_uploaded(dbsession, uploaded_file_db):
     with pytest.raises(HTTPException):
         data = get_file(dbsession, [uploaded_file_db.pin])
+    dbsession.commit()
 
 def test_get_file_func_1_ok(dbsession, uploaded_file_os):
     data = get_file(dbsession, [uploaded_file_os.pin])
@@ -74,6 +77,8 @@ def test_get_file_func_1_ok(dbsession, uploaded_file_os):
             'two_sided': uploaded_file_os.option_two_sided or False,
         },
     }
+    dbsession.commit()
+
 def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
     with pytest.raises(HTTPException):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])

@@ -45,6 +45,7 @@ def test_post_success(client, dbsession):
         UnionMember.union_number == body['users'][0]['union_number'],
         UnionMember.student_number == body['users'][0]['student_number'],
     ).delete()
+    dbsession.commit()
 
 
 def test_post_incorrect_password(client):

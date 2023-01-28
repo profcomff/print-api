@@ -8,18 +8,16 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
-from print_service import __version__
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.settings import Settings, get_settings
-
 
 settings: Settings = get_settings()
 
 
 def generate_pin(session: Session):
     for i in range(15):
-        pin = ''.join(random.choice(settings.PIN_SYMBOLS) for i in range(settings.PIN_LENGTH))
+        pin = ''.join(random.choice(settings.PIN_SYMBOLS) for _ in range(settings.PIN_LENGTH))
         cnt = (
             session.query(File)
             .filter(
@@ -36,7 +34,7 @@ def generate_pin(session: Session):
 
 def generate_filename(original_filename: str):
     datestr = date.today().isoformat()
-    salt = ''.join(random.choice(settings.PIN_SYMBOLS) for i in range(128))
+    salt = ''.join(random.choice(settings.PIN_SYMBOLS) for _ in range(128))
     ext = re.findall(r'\w+', original_filename.split('.')[-1])[0]
     return f'{datestr}-{salt}.{ext}'
 

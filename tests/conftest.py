@@ -7,13 +7,14 @@ from print_service.routes import app
 from print_service.settings import Settings
 
 
-@pytest.fixture(scope='session')
-def client():
+@pytest.fixture
+def client(mocker):
+    mocker.patch("auth_lib.fastapi.UnionAuth.__call__", return_value={"email": "test"})
     client = TestClient(app)
     return client
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def dbsession() -> Session:
     settings = Settings()
     engine = create_engine(settings.DB_DSN, pool_pre_ping=True)

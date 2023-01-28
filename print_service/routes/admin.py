@@ -1,26 +1,26 @@
 import json
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from redis import Redis
 
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
+from .auth import auth
+from auth_lib.fastapi import UnionAuth
 
 logger = logging.getLogger(__name__)
 settings: Settings = get_settings()
 router = APIRouter()
 
 
-class AdminAuth(BaseModel):
-    secret: str
 
 
-class UpdateInput(AdminAuth):
+class UpdateInput(BaseModel):
     terminal_token: str
 
 
-class RebootInput(AdminAuth):
+class RebootInput(BaseModel):
     terminal_token: str
 
 
@@ -45,9 +45,8 @@ class InstantCommandSender:
 
 
 @router.post("/update")
-async def manual_update_terminal(input: UpdateInput):
-    if input.secret != settings.SECRET_KEY:
-        raise HTTPException(403, {"status": "error", "detail": "Incorrect secret"})
+async def manual_update_terminal(input: UpdateInput, user: UnionAuth = Depends(auth)):
+    logger.info(f"User {user['email']} updated terminal")
     sender = InstantCommandSender()
     if sender.update(input.terminal_token):
         sender.redis.close()
@@ -57,9 +56,8 @@ async def manual_update_terminal(input: UpdateInput):
 
 
 @router.post("/reboot")
-async def reboot_terminal(input: RebootInput):
-    if input.secret != settings.SECRET_KEY:
-        raise HTTPException(403, {"status": "error", "detail": "Incorrect secret"})
+async def reboot_terminal(input: RebootInput, user: UnionAuth = Depends(auth)):
+    logger.info(f"User {user['email']} rebooted terminal")
     sender = InstantCommandSender()
     if sender.reboot(input.terminal_token):
         sender.redis.close()

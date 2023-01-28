@@ -104,6 +104,7 @@ jobs:
             --env QR_TOKEN_PREFIX='https://printer.ui.test.profcomff.com#' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
+            --env AUTH_URL=https://auth.api.test.profcomff.com/ \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
           docker network connect com_profcomff_api_printer_test_network ${{ env.CONTAITER_NAME }}
@@ -165,6 +166,7 @@ jobs:
             --env QR_TOKEN_PREFIX='https://app.profcomff.com/apps#' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
+            --env AUTH_URL=https://auth.api.profcomff.com/ \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker network connect com_profcomff_api_printer_network ${{ env.CONTAITER_NAME }}

@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     QR_TOKEN_TTL: int = 30  # Show time of QR code in seconds
     QR_TOKEN_DELAY: int = 5  # How long QR code valid after hide in seconds
 
-    AUTH_URL: AnyUrl
+    AUTH_URL: AnyUrl = "https://auth.api.test.profcomff.com/"
 
     class Config:
         env_file = '.env'

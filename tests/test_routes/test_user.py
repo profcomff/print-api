@@ -36,7 +36,6 @@ def test_post_success(client, dbsession):
                 'student_number': '1967',
             }
         ],
-        'secret': settings.SECRET_KEY,
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
@@ -46,21 +45,6 @@ def test_post_success(client, dbsession):
         UnionMember.student_number == body['users'][0]['student_number'],
     ).delete()
     dbsession.commit()
-
-
-def test_post_incorrect_password(client):
-    body = {
-        'users': [
-            {
-                'username': 'paul',
-                'union_number': '1966',
-                'student_number': '1967',
-            }
-        ],
-        'secret': f"{settings.SECRET_KEY}secret!!!",
-    }
-    res = client.post(url, data=json.dumps(body))
-    assert res.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.parametrize(
@@ -99,6 +83,6 @@ def test_post_incorrect_password(client):
     ],
 )
 def test_post_list_duplicates(users, client):
-    body = {'users': users, 'secret': settings.SECRET_KEY}
+    body = {'users': users}
     res = client.post(url, json=body)
     assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()

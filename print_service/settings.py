@@ -1,15 +1,13 @@
 import string
 from functools import lru_cache
-from typing import List, Optional
+from typing import List
 
-from pydantic import BaseSettings, DirectoryPath, PostgresDsn, RedisDsn
+from pydantic import BaseSettings, DirectoryPath, PostgresDsn, RedisDsn, AnyUrl
 
 
 class Settings(BaseSettings):
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
     REDIS_DSN: RedisDsn = 'redis://localhost:6379/0'
-
-    SECRET_KEY: Optional[str] = '42'
 
     CONTENT_TYPES: List[str] = ['application/pdf']
     MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах
@@ -31,6 +29,8 @@ class Settings(BaseSettings):
     QR_TOKEN_LENGTH: int = 6
     QR_TOKEN_TTL: int = 30  # Show time of QR code in seconds
     QR_TOKEN_DELAY: int = 5  # How long QR code valid after hide in seconds
+
+    AUTH_URL: AnyUrl = "https://auth.api.test.profcomff.com/"
 
     class Config:
         env_file = '.env'

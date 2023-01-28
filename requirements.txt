@@ -9,4 +9,5 @@ fastapi-sqlalchemy
 python-multipart
 gunicorn
 websockets
+auth_lib_profcomff[fastapi]
 redis

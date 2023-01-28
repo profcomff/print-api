@@ -102,8 +102,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
             func.upper(UnionMember.union_number) == inp.number.upper(),
         ),
         func.upper(UnionMember.surname) == inp.surname.upper(),
-    )
-    user = user.one_or_none()
+    ).one_or_none()
     if not user:
         raise HTTPException(403, 'User not found in trade union list')
     try:

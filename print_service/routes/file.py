@@ -184,7 +184,7 @@ async def upload_file(
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         background_tasks.add_task (process_image,memory_file,fileName) #сама конвертация в фоне, .pdf поставит функция 
         #process_image(memory_file,fileName)#.pdf поставит функция 
-        file_model.file=f"{splitext(file_model.file)[0]}pdf"#обновить имя в бд, чтобы не сломать печать 
+        file_model.file=f"{splitext(file_model.file)[0]}.pdf"#обновить имя в бд, чтобы не сломать печать 
         db.session.commit()
 
 

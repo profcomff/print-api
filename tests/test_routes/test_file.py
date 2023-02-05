@@ -80,7 +80,7 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
 
 def test_upload_and_print_pdf(pinPdf,client):
     pin=pinPdf
-    fileName = 'tests/test_routes/test_files/test.pdf'
+    fileName = 'test_files/test.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
     print(res.text)
@@ -90,7 +90,7 @@ def test_upload_and_print_pdf(pinPdf,client):
 
 def test_upload_and_print_jpg(pinJpg,client):
     pin=pinJpg
-    fileName = 'tests/test_routes/test_files/test.jpg'
+    fileName = 'test_files/test.jpg'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"image/jpeg")}
     res = client.post(f"{url}/{pin}", files=files)
     print(res.text)
@@ -102,7 +102,7 @@ def test_upload_and_print_jpg(pinJpg,client):
 
 def test_upload_and_print_png(pinPng,client):
     pin=pinPng
-    fileName = 'tests/test_routes/test_files/test.png'
+    fileName = 'test_files/test.png'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"image/png")}
     res = client.post(f"{url}/{pin}", files=files)
     print(res.text)

@@ -1,5 +1,4 @@
 aiofiles
-click
 pydantic[dotenv]
 uvicorn
 sqlalchemy
@@ -11,3 +10,5 @@ python-multipart
 Pillow
 gunicorn
 fpdf2
+websockets
+redis

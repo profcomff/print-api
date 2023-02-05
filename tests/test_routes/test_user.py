@@ -99,5 +99,5 @@ def test_post_incorrect_password(client):
 )
 def test_post_list_duplicates(users, client):
     body = {'users': users, 'secret': settings.SECRET_KEY}
-    res = client.post(url, data=json.dumps(body))
-    assert res.status_code == status.HTTP_400_BAD_REQUEST
+    res = client.post(url, json=body)
+    assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()

@@ -6,7 +6,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_sqlalchemy import DBSessionMiddleware
 
 from print_service import __version__
-from print_service.api_routes import file_router, user_router
+from print_service.routes.file import router as file_router
+from print_service.routes.user import router as user_router
+from print_service.routes.qrprint import router as qrprint_router
+from print_service.routes.admin import router as admin_router
 from print_service.settings import Settings, get_settings
 
 
@@ -19,7 +22,6 @@ app = FastAPI(
         'Серверная часть сервиса отправки заданий на печать и получения файлов для печати с терминала'
     ),
     version=__version__,
-    root_path=settings.ROOT,
 )
 app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN, engine_args=dict(pool_pre_ping=True))
 
@@ -34,4 +36,6 @@ app.add_middleware(
 
 app.include_router(user_router, prefix='', tags=['User'])
 app.include_router(file_router, prefix='/file', tags=['File'])
+app.include_router(qrprint_router, prefix='/qr', tags=['File'])
+app.include_router(admin_router, prefix='/admin', tags=['Admin'])
 app.mount('/static', StaticFiles(directory='static'), 'static')

@@ -13,23 +13,26 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up docker
         uses: docker-practice/actions-setup-docker@master
-      - name: Run postgres
-        run: |
-          docker run -d -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name db-test postgres:15-alpine
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
       - name: Install dependencies
         run: |
           python -m ensurepip
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements.dev.txt
+      - name: Run postgres
+        run: |
+          make db
       - name: Migrate DB
         run: |
-          DB_DSN=postgresql://postgres@localhost:5432/postgres alembic upgrade head
+          make migrate
+      - name: Run redis
+        run: |
+          make redis
       - name: Build coverage file
         run: |
-          SECRET_KEY='fg' DB_DSN=postgresql://postgres@localhost:5432/postgres pytest --cache-clear --cov=print_service tests > pytest-coverage.txt
+          pytest --cache-clear --cov=print_service tests > pytest-coverage.txt
       - name: Print report
         if: always()
         run: |

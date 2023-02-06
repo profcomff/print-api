@@ -67,7 +67,7 @@ def get_file(dbsession, pin: str or list[str]):
         })
     return result
 
-def checkPDFOk(fullfile):
+def checkPDFOk(fullfile:str):
     with open(fullfile, 'rb') as f:
         try:
             pdf = PdfFileReader(f)

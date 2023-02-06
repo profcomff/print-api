@@ -6,7 +6,7 @@ from pydantic import BaseSettings, DirectoryPath, PostgresDsn, RedisDsn, AnyUrl
 
 
 class Settings(BaseSettings):
-    DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
+    DB_DSN: PostgresDsn = 'postgresql://postgres:1234@localhost:5432/postgres'
     REDIS_DSN: RedisDsn = 'redis://localhost:6379/0'
 
     CONTENT_TYPES: List[str] = ['application/pdf']

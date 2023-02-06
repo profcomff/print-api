@@ -11,6 +11,7 @@ from sqlalchemy.orm.session import Session
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.settings import Settings, get_settings
+from PyPDF3 import PdfFileReader
 
 settings: Settings = get_settings()
 
@@ -65,3 +66,16 @@ def get_file(dbsession, pin: str or list[str]):
             },
         })
     return result
+
+def checkPDFOk(fullfile):
+    with open(fullfile, 'rb') as f:
+        try:
+            pdf = PdfFileReader(f)
+            info = pdf.getDocumentInfo()
+            if info:
+                return True
+            else:
+                return False
+        except:
+            return False
+    

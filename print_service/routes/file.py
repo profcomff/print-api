@@ -1,6 +1,6 @@
 import logging
 import re
-from os.path import abspath, exists
+from os.path import abspath, exists, remove
 
 import aiofiles
 from fastapi import APIRouter, File, UploadFile
@@ -15,6 +15,8 @@ from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin, get_file
+
+from print_service.utils import checkPDFOk
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -171,6 +173,9 @@ async def upload_file(
         if len(memory_file) > settings.MAX_SIZE:
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
+        if(checkPDFOk(path)==False):
+            remove(path)
+            raise HTTPException(415, f'File corrupted')
     await file.close()
 
     return {

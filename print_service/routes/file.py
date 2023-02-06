@@ -175,8 +175,9 @@ async def upload_file(
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
         if(checkPDFOk(path)==False):
+            print("corrupted file")
             remove(path)
-            raise HTTPException(415, f'File corrupted')
+            raise HTTPException(415, 'File corrupted')
     await file.close()
 
     return {

@@ -103,8 +103,8 @@ def test_upload_and_print_broken_file(pinPdf,client):
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
     print(res.text)
-    assert res.status_code == status.HTTP_200_OK
+    assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
     res2 = client.get(f"{url}/{pin}")
-    assert res2.status_code == status.HTTP_200_OK
+    assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
 
 

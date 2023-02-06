@@ -165,7 +165,7 @@ async def upload_file(
             f'Only {", ".join(settings.CONTENT_TYPES)} files allowed, but {file.content_type} recieved',
         )
 
-    path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
+    path = abspath("static") + '/' + file_model.file
     if exists(path):
         raise HTTPException(415, 'File already uploaded')
     fileName,extension=splitext(path)#[0] - путь + имя, [1] - расширение

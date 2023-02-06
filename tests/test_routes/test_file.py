@@ -9,7 +9,6 @@ from print_service.settings import get_settings
 from print_service.utils import get_file
 
 from print_service.utils import checkPDFOk
-from os.path import abspath
 url = '/file'
 settings = get_settings()
 settings.STATIC_FOLDER = './static'
@@ -85,12 +84,12 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])
 
 def testFileCheck():
-    assert checkPDFOk(abspath("test_files/broken.pdf")) == False
-    assert checkPDFOk(abspath("test_files/correct.pdf")) == True
+    assert checkPDFOk("test_files/broken.pdf") == False
+    assert checkPDFOk("test_files/correct.pdf") == True
 
 def test_upload_and_print_correct_pdf(pinPdf,client):
     pin=pinPdf
-    fileName = abspath('test_files/correct.pdf')
+    fileName ='test_files/correct.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
     print(res.text)
@@ -100,7 +99,7 @@ def test_upload_and_print_correct_pdf(pinPdf,client):
 
 def test_upload_and_print_broken_file(pinPdf,client):
     pin=pinPdf
-    fileName = abspath('test_files/broken.pdf')
+    fileName = 'test_files/broken.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
     print(res.text)

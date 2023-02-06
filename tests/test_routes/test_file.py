@@ -86,3 +86,25 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
 def testFileCheck():
     assert checkPDFOk("test_files/broken.pdf") == False
     assert checkPDFOk("test_files/correct.pdf") == True
+
+def test_upload_and_print_correct_pdf(pinPdf,client):
+    pin=pinPdf
+    fileName = 'test_files/correct.pdf'
+    files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    print(res.text)
+    assert res.status_code == status.HTTP_200_OK
+    res2 = client.get(f"{url}/{pin}")
+    assert res2.status_code == status.HTTP_200_OK
+
+def test_upload_and_print_broken_file(pinPdf,client):
+    pin=pinPdf
+    fileName = 'test_files/broken.pdf'
+    files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    print(res.text)
+    assert res.status_code == status.HTTP_200_OK
+    res2 = client.get(f"{url}/{pin}")
+    assert res2.status_code == status.HTTP_200_OK
+
+

@@ -1,6 +1,7 @@
 import logging
 import re
-from os.path import abspath, exists, remove
+from os.path import abspath, exists
+from os import remove
 
 import aiofiles
 from fastapi import APIRouter, File, UploadFile

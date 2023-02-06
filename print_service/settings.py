@@ -6,13 +6,14 @@ from pydantic import BaseSettings, DirectoryPath, PostgresDsn, RedisDsn, AnyUrl
 
 
 class Settings(BaseSettings):
-    DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'#'postgresql://postgres:1234@localhost:5432/postgres'
+    DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
     REDIS_DSN: RedisDsn = 'redis://localhost:6379/0'
 
     CONTENT_TYPES: List[str] = ['application/pdf']
     MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
-    STATIC_FOLDER: str  = "static"
+    STATIC_FOLDER: DirectoryPath | None
+
     ALLOW_STUDENT_NUMBER: bool = False
 
     PIN_SYMBOLS: str = string.ascii_uppercase + string.digits

@@ -1,3 +1,6 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 import json
 
 import pytest
@@ -8,7 +11,9 @@ from print_service.models import File
 from print_service.settings import get_settings
 from print_service.utils import get_file
 
-from print_service.utils import checkPDFOk
+from print_service.utils import check_pdf_ok
+
+
 url = '/file'
 settings = get_settings()
 settings.STATIC_FOLDER = './static'
@@ -66,6 +71,7 @@ def test_get_file_func_1_not_uploaded(dbsession, uploaded_file_db):
         data = get_file(dbsession, [uploaded_file_db.pin])
     dbsession.commit()
 
+
 def test_get_file_func_1_ok(dbsession, uploaded_file_os):
     data = get_file(dbsession, [uploaded_file_os.pin])
     assert len(data) == 1
@@ -79,13 +85,16 @@ def test_get_file_func_1_ok(dbsession, uploaded_file_os):
     }
     dbsession.commit()
 
+
 def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
     with pytest.raises(HTTPException):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])
 
+
 def testFileCheck():
-    assert checkPDFOk("tests/test_routes/test_files/broken.pdf") == False
-    assert checkPDFOk("tests/test_routes/test_files/correct.pdf") == True
+    assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/broken.pdf"))== False
+    assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/correct.pdf")) == True
+
 
 def test_upload_and_print_correct_pdf(pinPdf,client):
     pin=pinPdf
@@ -97,6 +106,7 @@ def test_upload_and_print_correct_pdf(pinPdf,client):
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_200_OK
 
+
 def test_upload_and_print_broken_file(pinPdf,client):
     pin=pinPdf
     fileName = 'tests/test_routes/test_files/broken.pdf'
@@ -106,5 +116,3 @@ def test_upload_and_print_broken_file(pinPdf,client):
     assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
-
-

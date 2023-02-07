@@ -17,7 +17,7 @@ from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin, get_file
 
-from print_service.utils import checkPDFOk
+from print_service.utils import check_pdf_ok
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -174,8 +174,8 @@ async def upload_file(
         if len(memory_file) > settings.MAX_SIZE:
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
-        if(checkPDFOk(path)==False):
-            print("corrupted file")
+        pdf_ok=await check_pdf_ok(path)
+        if not pdf_ok:
             remove(path)
             raise HTTPException(415, 'File corrupted')
     await file.close()

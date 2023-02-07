@@ -67,15 +67,13 @@ def get_file(dbsession, pin: str or list[str]):
         })
     return result
 
-def checkPDFOk(fullfile:str):
+
+async def check_pdf_ok(fullfile:str):
     with open(fullfile, 'rb') as f:
         try:
             pdf = PdfFileReader(f)
             info = pdf.getDocumentInfo()
-            if info:
-                return True
-            else:
-                return False
+            return bool(info)
         except:
             return False
     

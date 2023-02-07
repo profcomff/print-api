@@ -37,7 +37,6 @@ def uploaded_file_db(dbsession, union_member_user, client):
     dbsession.commit()
 
 
-
 @pytest.fixture
 def uploaded_file_os(uploaded_file_db):
     with open(f'static/{uploaded_file_db.file}', 'w') as file:
@@ -46,9 +45,8 @@ def uploaded_file_os(uploaded_file_db):
     os.remove(f'static/{uploaded_file_db.file}')
 
 
-
 @pytest.fixture
-def pinPdf(dbsession, union_member_user, client):
+def pin_pdf(dbsession, union_member_user, client):
     body = {
         "surname": union_member_user['surname'],
         "number": union_member_user['union_number'],

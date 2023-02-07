@@ -96,8 +96,8 @@ def testFileCheck():
     assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/correct.pdf")) == True
 
 
-def test_upload_and_print_correct_pdf(pinPdf,client):
-    pin=pinPdf
+def test_upload_and_print_correct_pdf(pin_pdf,client):
+    pin=pin_pdf
     fileName ='tests/test_routes/test_files/correct.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
@@ -107,8 +107,8 @@ def test_upload_and_print_correct_pdf(pinPdf,client):
     assert res2.status_code == status.HTTP_200_OK
 
 
-def test_upload_and_print_broken_file(pinPdf,client):
-    pin=pinPdf
+def test_upload_and_print_broken_file(pin_pdf,client):
+    pin=pin_pdf
     fileName = 'tests/test_routes/test_files/broken.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)

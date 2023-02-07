@@ -57,7 +57,9 @@ class InstantPrintFetcher:
             qr_token = ''.join(random.choice(self.symbols) for _ in range(self.length))
             if not self.redis.get(qr_token):  # If this qr already exists, generate new
                 break
-        self.redis.set(qr_token, self.terminal_token, ex=self.ttl+self.delay)  # Send token to redis +ttl
+        self.redis.set(
+            qr_token, self.terminal_token, ex=self.ttl + self.delay
+        )  # Send token to redis +ttl
         return qr_token
 
     async def get_tasks(self) -> dict[str, list[str]]:

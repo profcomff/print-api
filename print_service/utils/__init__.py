@@ -60,21 +60,23 @@ def get_file(dbsession, pin: str or list[str]):
         if not exists(path):
             raise HTTPException(415, 'File has not uploaded yet')
 
-        result.append({
-            'filename': f.file,
-            'options': {
-                'pages': f.option_pages or '',
-                'copies': f.option_copies or 1,
-                'two_sided': f.option_two_sided or False,
-            },
-        })
+        result.append(
+            {
+                'filename': f.file,
+                'options': {
+                    'pages': f.option_pages or '',
+                    'copies': f.option_copies or 1,
+                    'two_sided': f.option_two_sided or False,
+                },
+            }
+        )
     return result
 
 
-def check_pdf_ok(f:bytes):
-        try:
-            pdf = PdfFileReader(io.BytesIO(f))
-            info = pdf.getDocumentInfo()
-            return bool(info)
-        except PyPdfError:
-            return False
+def check_pdf_ok(f: bytes):
+    try:
+        pdf = PdfFileReader(io.BytesIO(f))
+        info = pdf.getDocumentInfo()
+        return bool(info)
+    except PyPdfError:
+        return False

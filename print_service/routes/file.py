@@ -174,7 +174,7 @@ async def upload_file(
         if len(memory_file) > settings.MAX_SIZE:
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
-        if not await check_pdf_ok(path):
+        if not check_pdf_ok(memory_file):
             await aiofiles.os.remove(path)
             raise HTTPException(415, 'File corrupted')
     await file.close()

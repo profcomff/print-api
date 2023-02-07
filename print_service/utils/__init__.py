@@ -71,10 +71,8 @@ def get_file(dbsession, pin: str or list[str]):
     return result
 
 
-async def check_pdf_ok(fullfile:str):
-    async with aiofiles.open(fullfile, 'rb') as f:
+def check_pdf_ok(f:bytes):
         try:
-            f = await f.read()
             pdf = PdfFileReader(io.BytesIO(f))
             info = pdf.getDocumentInfo()
             return bool(info)

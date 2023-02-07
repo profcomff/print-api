@@ -91,9 +91,9 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])
 
 
-def testFileCheck():
-    assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/broken.pdf"))== False
-    assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/correct.pdf")) == True
+def test_file_check():
+    assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/broken.pdf")) is False
+    assert asyncio.run(check_pdf_ok("tests/test_routes/test_files/correct.pdf")) is True
 
 
 def test_upload_and_print_correct_pdf(pin_pdf,client):
@@ -101,7 +101,6 @@ def test_upload_and_print_correct_pdf(pin_pdf,client):
     fileName ='tests/test_routes/test_files/correct.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
-    print(res.text)
     assert res.status_code == status.HTTP_200_OK
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_200_OK
@@ -112,7 +111,6 @@ def test_upload_and_print_broken_file(pin_pdf,client):
     fileName = 'tests/test_routes/test_files/broken.pdf'
     files = {'file': (f"{fileName}",open(f"{fileName}",'rb'),"application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
-    print(res.text)
     assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE

@@ -12,6 +12,9 @@ from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.settings import Settings, get_settings
 from PyPDF3 import PdfFileReader
+from PyPDF3.utils import PyPdfError
+import aiofiles
+import io
 
 settings: Settings = get_settings()
 
@@ -69,11 +72,11 @@ def get_file(dbsession, pin: str or list[str]):
 
 
 async def check_pdf_ok(fullfile:str):
-    with open(fullfile, 'rb') as f:
+    async with aiofiles.open(fullfile, 'rb') as f:
         try:
-            pdf = PdfFileReader(f)
+            f = await f.read()
+            pdf = PdfFileReader(io.BytesIO(f))
             info = pdf.getDocumentInfo()
             return bool(info)
-        except:
+        except PyPdfError:
             return False
-    

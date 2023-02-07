@@ -1,9 +1,9 @@
 import logging
 import re
 from os.path import abspath, exists
-from os import remove
 
 import aiofiles
+import aiofiles.os
 from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
@@ -176,7 +176,7 @@ async def upload_file(
         await saved_file.write(memory_file)
         pdf_ok=await check_pdf_ok(path)
         if not pdf_ok:
-            remove(path)
+            await aiofiles.os.remove(path)
             raise HTTPException(415, 'File corrupted')
     await file.close()
 

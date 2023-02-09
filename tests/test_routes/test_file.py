@@ -1,3 +1,6 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 import json
 
 import pytest
@@ -7,6 +10,8 @@ from starlette import status
 from print_service.models import File
 from print_service.settings import get_settings
 from print_service.utils import get_file
+
+from print_service.utils import check_pdf_ok
 
 
 url = '/file'
@@ -66,6 +71,7 @@ def test_get_file_func_1_not_uploaded(dbsession, uploaded_file_db):
         data = get_file(dbsession, [uploaded_file_db.pin])
     dbsession.commit()
 
+
 def test_get_file_func_1_ok(dbsession, uploaded_file_os):
     data = get_file(dbsession, [uploaded_file_os.pin])
     assert len(data) == 1
@@ -79,6 +85,32 @@ def test_get_file_func_1_ok(dbsession, uploaded_file_os):
     }
     dbsession.commit()
 
+
 def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
     with pytest.raises(HTTPException):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])
+
+
+def test_file_check():
+    assert check_pdf_ok(open("tests/test_routes/test_files/broken.pdf", "rb").read()) is False
+    assert check_pdf_ok(open("tests/test_routes/test_files/correct.pdf", "rb").read()) is True
+
+
+def test_upload_and_print_correct_pdf(pin_pdf, client):
+    pin = pin_pdf
+    fileName = 'tests/test_routes/test_files/correct.pdf'
+    files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    assert res.status_code == status.HTTP_200_OK
+    res2 = client.get(f"{url}/{pin}")
+    assert res2.status_code == status.HTTP_200_OK
+
+
+def test_upload_and_print_broken_file(pin_pdf, client):
+    pin = pin_pdf
+    fileName = 'tests/test_routes/test_files/broken.pdf'
+    files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+    res2 = client.get(f"{url}/{pin}")
+    assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE

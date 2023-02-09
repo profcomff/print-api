@@ -11,6 +11,10 @@ from sqlalchemy.orm.session import Session
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.settings import Settings, get_settings
+from PyPDF3 import PdfFileReader
+from PyPDF3.utils import PyPdfError
+import aiofiles
+import io
 
 settings: Settings = get_settings()
 
@@ -56,12 +60,23 @@ def get_file(dbsession, pin: str or list[str]):
         if not exists(path):
             raise HTTPException(415, 'File has not uploaded yet')
 
-        result.append({
-            'filename': f.file,
-            'options': {
-                'pages': f.option_pages or '',
-                'copies': f.option_copies or 1,
-                'two_sided': f.option_two_sided or False,
-            },
-        })
+        result.append(
+            {
+                'filename': f.file,
+                'options': {
+                    'pages': f.option_pages or '',
+                    'copies': f.option_copies or 1,
+                    'two_sided': f.option_two_sided or False,
+                },
+            }
+        )
     return result
+
+
+def check_pdf_ok(f: bytes):
+    try:
+        pdf = PdfFileReader(io.BytesIO(f))
+        info = pdf.getDocumentInfo()
+        return bool(info)
+    except PyPdfError:
+        return False

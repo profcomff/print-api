@@ -3,6 +3,7 @@ import re
 from os.path import abspath, exists
 
 import aiofiles
+import aiofiles.os
 from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
@@ -15,6 +16,8 @@ from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import generate_filename, generate_pin, get_file
+
+from print_service.utils import check_pdf_ok
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -171,6 +174,9 @@ async def upload_file(
         if len(memory_file) > settings.MAX_SIZE:
             raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
+        if not check_pdf_ok(memory_file):
+            await aiofiles.os.remove(path)
+            raise HTTPException(415, 'File corrupted')
     await file.close()
 
     return {
@@ -209,7 +215,9 @@ async def update_file_options(
         raise HTTPException(404, f'Pin {pin} not found')
     file_model.option_pages = options.get('pages') or file_model.option_pages
     file_model.option_copies = options.get('copies') or file_model.option_copies
-    file_model.option_two_sided = v if (v := options.get('two_sided')) is not None else file_model.option_two_sided
+    file_model.option_two_sided = (
+        v if (v := options.get('two_sided')) is not None else file_model.option_two_sided
+    )
     db.session.commit()
     return {
         'pin': file_model.pin,

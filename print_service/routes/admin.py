@@ -14,8 +14,6 @@ settings: Settings = get_settings()
 router = APIRouter()
 
 
-
-
 class UpdateInput(BaseModel):
     terminal_token: str
 

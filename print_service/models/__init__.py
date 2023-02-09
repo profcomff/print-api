@@ -4,7 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Boolean
 
@@ -36,6 +36,8 @@ class File(Model):
     option_copies: Mapped[int] = Column(Integer)
     option_two_sided: Mapped[bool] = Column(Boolean)
     created_at: Mapped[datetime] = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = Column(
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')

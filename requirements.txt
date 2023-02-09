@@ -1,7 +1,7 @@
 aiofiles
 pydantic[dotenv]
 uvicorn
-sqlalchemy
+sqlalchemy 
 psycopg2-binary
 alembic
 fastapi
@@ -11,3 +11,4 @@ gunicorn
 websockets
 auth_lib_profcomff[fastapi]
 redis
+PyPDF3

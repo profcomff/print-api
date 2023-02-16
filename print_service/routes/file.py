@@ -172,7 +172,7 @@ async def upload_file(
     async with aiofiles.open(path, 'wb') as saved_file:
         memory_file = await file.read()
         if len(memory_file) > settings.MAX_SIZE:
-            raise HTTPException(415, f'File too large, {settings.MAX_SIZE} bytes allowed')
+            raise HTTPException(413, f'Content too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
         if not check_pdf_ok(memory_file):
             await aiofiles.os.remove(path)

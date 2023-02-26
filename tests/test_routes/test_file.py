@@ -96,7 +96,6 @@ def test_file_check():
     assert check_pdf_ok(open("tests/test_routes/test_files/correct.pdf", "rb").read()) is True
 
 
-@pytest.mark.skip
 def test_upload_and_print_correct_pdf(pin_pdf, client):
     pin = pin_pdf
     fileName = 'tests/test_routes/test_files/correct.pdf'
@@ -107,7 +106,6 @@ def test_upload_and_print_correct_pdf(pin_pdf, client):
     assert res2.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.skip
 def test_upload_and_print_broken_file(pin_pdf, client):
     pin = pin_pdf
     fileName = 'tests/test_routes/test_files/broken.pdf'

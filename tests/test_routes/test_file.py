@@ -114,3 +114,23 @@ def test_upload_and_print_broken_file(pin_pdf, client):
     assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+
+
+def test_upload_and_print_not_pdf_file(pin_pdf, client):
+    pin = pin_pdf
+    fileName = 'tests/test_routes/test_files/not_pdf.pdf'
+    files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+    res2 = client.get(f"{url}/{pin}")
+    assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+
+
+def test_upload_and_print_encrypted_file(pin_pdf, client):
+    pin = pin_pdf
+    fileName = 'tests/test_routes/test_files/encrypted.pdf'
+    files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    assert res.status_code == status.HTTP_200_OK
+    res2 = client.get(f"{url}/{pin}")
+    assert res2.status_code == status.HTTP_200_OK

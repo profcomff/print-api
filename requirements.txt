@@ -11,4 +11,4 @@ gunicorn
 websockets
 auth_lib_profcomff[fastapi]
 redis
-PyPDF3
+PyPDF4

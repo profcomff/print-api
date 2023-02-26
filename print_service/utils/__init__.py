@@ -11,8 +11,7 @@ from sqlalchemy.orm.session import Session
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.settings import Settings, get_settings
-from PyPDF3 import PdfFileReader
-from PyPDF3.utils import PyPdfError
+from PyPDF4 import PdfFileReader
 import aiofiles
 import io
 
@@ -75,8 +74,7 @@ def get_file(dbsession, pin: str or list[str]):
 
 def check_pdf_ok(f: bytes):
     try:
-        pdf = PdfFileReader(io.BytesIO(f))
-        info = pdf.getDocumentInfo()
-        return bool(info)
-    except PyPdfError:
+        PdfFileReader(io.BytesIO(f))
+        return True
+    except Exception as e:
         return False

@@ -24,6 +24,7 @@ class UserCreate(BaseModel):
     username: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
     student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
+    is_deleted: bool = False
 
 
 class UpdateUserList(BaseModel):
@@ -49,7 +50,7 @@ async def check_union_member(
     """Проверяет наличие пользователя в списке."""
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
-        user = user.filter(UnionMember.union_number != None)
+        user = user.filter(UnionMember.union_number is not None)
     user: UnionMember = user.filter(
         or_(
             func.upper(UnionMember.student_number) == number,
@@ -69,6 +70,7 @@ async def check_union_member(
             'number': number,
             'student_number': user.student_number,
             'union_number': user.union_number,
+            'is_deleted': user.is_deleted
         }
 
 
@@ -93,11 +95,13 @@ def update_list(input: UpdateUserList, user: dict[str, str] = Depends(auth)):
                 or_(
                     and_(
                         UnionMember.union_number == user.union_number,
-                        UnionMember.union_number != None,
+                        UnionMember.union_number is not None,
+                        UnionMember.is_deleted is not True,
                     ),
                     and_(
                         UnionMember.student_number == user.student_number,
-                        UnionMember.student_number != None,
+                        UnionMember.student_number is not None,
+                        UnionMember.is_deleted is not True,
                     ),
                 )
             )
@@ -108,13 +112,14 @@ def update_list(input: UpdateUserList, user: dict[str, str] = Depends(auth)):
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
+            db_user.is_deleted = user.is_deleted
         else:
-            db.session.add(
-                UnionMember(
-                    surname=user.username,
-                    union_number=user.union_number,
-                    student_number=user.student_number,
-                )
+            UnionMember.create(
+                session=db.session,
+                surname=user.username,
+                union_number=user.union_number,
+                student_number=user.student_number,
+                is_deleted=user.is_deleted
             )
         db.session.flush()
 

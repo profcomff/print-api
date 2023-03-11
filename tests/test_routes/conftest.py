@@ -58,3 +58,7 @@ def pin_pdf(dbsession, union_member_user, client):
     yield pin
     dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
     dbsession.commit()
+
+
+
+

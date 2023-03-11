@@ -34,6 +34,7 @@ def test_post_success(client, dbsession):
                 'username': 'paul',
                 'union_number': '1966',
                 'student_number': '1967',
+                'is_deleted': 'False',
             }
         ],
     }
@@ -43,6 +44,7 @@ def test_post_success(client, dbsession):
         UnionMember.surname == body['users'][0]['username'],
         UnionMember.union_number == body['users'][0]['union_number'],
         UnionMember.student_number == body['users'][0]['student_number'],
+        UnionMember.is_deleted == body['users'][0]['is_deleted'],
     ).delete()
     dbsession.commit()
 
@@ -56,11 +58,13 @@ def test_post_success(client, dbsession):
                     'username': 'paul',
                     'union_number': '404man',
                     'student_number': '30311',
+                    'is_deleted': 'False',
                 },
                 {
                     'username': 'marty',
                     'union_number': '404man',
                     'student_number': '303112',
+                    'is_deleted': 'False',
                 },
             ],
             id='same union_number',
@@ -71,11 +75,13 @@ def test_post_success(client, dbsession):
                     'username': 'alice',
                     'union_number': '500',
                     'student_number': '42',
+                    'is_deleted': 'False',
                 },
                 {
                     'username': 'polly',
                     'union_number': '503',
                     'student_number': '42',
+                    'is_deleted': 'False',
                 },
             ],
             id='same student_number',

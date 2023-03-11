@@ -22,6 +22,7 @@ def upgrade():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('surname', sa.String(), nullable=False),
         sa.Column('number', sa.String(), nullable=False),
+        sa.Column('is_deleted', sa.Boolean(), nullable=True, default=False),
         sa.PrimaryKeyConstraint('id'),
     )
     op.create_table(

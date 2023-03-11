@@ -12,3 +12,4 @@ websockets
 auth_lib_profcomff[fastapi]
 redis
 PyPDF4
+logging-profcomff

@@ -102,6 +102,7 @@ jobs:
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
             --env QR_TOKEN_PREFIX='https://printer.ui.test.profcomff.com#' \
+            --env GUNICORN_CMD_ARGS='--log-config  logging_test.conf' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
             --env AUTH_URL=https://auth.api.test.profcomff.com/ \
@@ -164,6 +165,7 @@ jobs:
             --env PIN_SYMBOLS=0123456789 \
             --env PIN_LENGTH=8 \
             --env QR_TOKEN_PREFIX='https://app.profcomff.com/apps#' \
+            --env GUNICORN_CMD_ARGS='--log-config  logging_prod.conf' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
             --env AUTH_URL=https://auth.api.profcomff.com/ \

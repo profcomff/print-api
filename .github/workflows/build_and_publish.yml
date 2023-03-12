@@ -72,7 +72,6 @@ jobs:
             --network=web \
             --workdir="/" \
             --env DB_DSN=${{ secrets.DB_DSN }} \
-            --env ROOT_PATH='/print' \
             --name ${{ env.CONTAITER_NAME }}_migration \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test \
             alembic upgrade head
@@ -98,6 +97,7 @@ jobs:
             --network=web \
             --volume com_profcomff_api_printer_test_static:/app/static \
             --env DB_DSN=${{ secrets.DB_DSN }} \
+            --env ROOT_PATH='/print' \
             --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \

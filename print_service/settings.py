@@ -1,3 +1,4 @@
+import os
 import string
 from functools import lru_cache
 from typing import List
@@ -6,8 +7,11 @@ from pydantic import BaseSettings, DirectoryPath, PostgresDsn, RedisDsn, AnyUrl
 
 
 class Settings(BaseSettings):
+    """Application settings"""
+
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'
     REDIS_DSN: RedisDsn = 'redis://localhost:6379/0'
+    ROOT_PATH: str = '/' + os.getenv('APP_NAME', '')
 
     CONTENT_TYPES: List[str] = ['application/pdf']
     MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах

@@ -22,6 +22,11 @@ app = FastAPI(
         'Серверная часть сервиса отправки заданий на печать и получения файлов для печати с терминала'
     ),
     version=__version__,
+
+    # Настраиваем интернет документацию
+    root_path=settings.ROOT_PATH if __version__ != 'dev' else '/',
+    docs_url=None if __version__ != 'dev' else '/docs',
+    redoc_url=None,
 )
 app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN, engine_args=dict(pool_pre_ping=True))
 

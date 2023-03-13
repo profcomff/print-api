@@ -97,6 +97,7 @@ jobs:
             --network=web \
             --volume com_profcomff_api_printer_test_static:/app/static \
             --env DB_DSN=${{ secrets.DB_DSN }} \
+            --env AUTH_URL='https://api.test.profcomff.com/auth' \
             --env ROOT_PATH='/print' \
             --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
@@ -161,6 +162,7 @@ jobs:
             --network=web \
             --volume com_profcomff_api_printer_static:/app/static \
             --env DB_DSN='${{ secrets.DB_DSN }}' \
+            --env AUTH_URL='https://api.profcomff.com/auth' \
             --env ROOT_PATH='/print' \
             --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \

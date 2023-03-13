@@ -9,7 +9,15 @@ from print_service.settings import Settings
 
 @pytest.fixture
 def client(mocker):
-    mocker.patch("auth_lib.fastapi.UnionAuth.__call__", return_value={"email": "test"})
+    user_mock = mocker.patch('auth_lib.fastapi.UnionAuth.__call__')
+    user_mock.return_value = {
+        "session_scopes": [{"id": 0, "name": "string", "comment": "string"}],
+        "user_scopes": [{"id": 0, "name": "string", "comment": "string"}],
+        "indirect_groups": [{"id": 0, "name": "string", "parent_id": 0}],
+        "groups": [{"id": 0, "name": "string", "parent_id": 0}],
+        "id": 0,
+        "email": "string",
+    }
     client = TestClient(app)
     return client
 

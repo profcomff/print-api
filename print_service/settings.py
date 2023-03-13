@@ -3,10 +3,11 @@ import string
 from functools import lru_cache
 from typing import List
 
+from auth_lib.fastapi import UnionAuthSettings
 from pydantic import BaseSettings, DirectoryPath, PostgresDsn, RedisDsn, AnyUrl
 
 
-class Settings(BaseSettings):
+class Settings(UnionAuthSettings, BaseSettings):
     """Application settings"""
 
     DB_DSN: PostgresDsn = 'postgresql://postgres@localhost:5432/postgres'

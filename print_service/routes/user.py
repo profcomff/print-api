@@ -11,7 +11,6 @@ from print_service import __version__
 from print_service.settings import get_settings
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
-from .auth import auth
 from auth_lib.fastapi import UnionAuth
 
 logger = logging.getLogger(__name__)
@@ -73,8 +72,11 @@ async def check_union_member(
 
 
 @router.post('/is_union_member')
-def update_list(input: UpdateUserList, user: dict[str, str] = Depends(auth)):
-    logger.info(f"User {user['email']} updated list")
+def update_list(
+    input: UpdateUserList,
+    user=Depends(UnionAuth(scopes=["print.user.create", "print.user.update", "print.user.delete"]))
+):
+    logger.info(f"User {user} updated list")
 
     union_numbers = [user.union_number for user in input.users if user.union_number is not None]
     student_numbers = [user.student_number for user in input.users if user.student_number is not None]

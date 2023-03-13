@@ -1,13 +1,13 @@
 import json
 import logging
 
-from fastapi import APIRouter, HTTPException, Depends
+from auth_lib.fastapi import UnionAuth
+from fastapi import APIRouter, Depends, HTTPException
 from redis import Redis
 
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from .auth import auth
-from auth_lib.fastapi import UnionAuth
+
 
 logger = logging.getLogger(__name__)
 settings: Settings = get_settings()
@@ -43,8 +43,10 @@ class InstantCommandSender:
 
 
 @router.post("/update")
-async def manual_update_terminal(input: UpdateInput, user: UnionAuth = Depends(auth)):
-    logger.info(f"User {user['email']} updated terminal")
+async def manual_update_terminal(
+    input: UpdateInput, user=Depends(UnionAuth(scopes=["print.terminal.service"]))
+):
+    logger.info(f"User {user} updated terminal")
     sender = InstantCommandSender()
     if sender.update(input.terminal_token):
         sender.redis.close()
@@ -54,8 +56,10 @@ async def manual_update_terminal(input: UpdateInput, user: UnionAuth = Depends(a
 
 
 @router.post("/reboot")
-async def reboot_terminal(input: RebootInput, user: UnionAuth = Depends(auth)):
-    logger.info(f"User {user['email']} rebooted terminal")
+async def reboot_terminal(
+    input: RebootInput, user=Depends(UnionAuth(scopes=["print.terminal.service"]))
+):
+    logger.info(f"User {user} rebooted terminal")
     sender = InstantCommandSender()
     if sender.reboot(input.terminal_token):
         sender.redis.close()

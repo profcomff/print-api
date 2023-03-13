@@ -4,7 +4,7 @@ import random
 from asyncio import sleep
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Header, WebSocket, HTTPException
+from fastapi import APIRouter, Header, HTTPException, WebSocket
 from fastapi_sqlalchemy import db
 from pydantic import conlist
 from redis import Redis

@@ -6,10 +6,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_sqlalchemy import DBSessionMiddleware
 
 from print_service import __version__
-from print_service.routes.file import router as file_router
-from print_service.routes.user import router as user_router
-from print_service.routes.qrprint import router as qrprint_router
 from print_service.routes.admin import router as admin_router
+from print_service.routes.file import router as file_router
+from print_service.routes.qrprint import router as qrprint_router
+from print_service.routes.user import router as user_router
 from print_service.settings import Settings, get_settings
 
 
@@ -22,7 +22,6 @@ app = FastAPI(
         'Серверная часть сервиса отправки заданий на печать и получения файлов для печати с терминала'
     ),
     version=__version__,
-
     # Настраиваем интернет документацию
     root_path=settings.ROOT_PATH if __version__ != 'dev' else '/',
     docs_url=None if __version__ != 'dev' else '/docs',

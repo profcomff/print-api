@@ -6,3 +6,4 @@ requests
 httpx
 pytest-cov
 pytest-mock
+autoflake

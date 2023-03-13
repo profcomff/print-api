@@ -15,9 +15,8 @@ from print_service.models import File as FileModel
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from print_service.utils import generate_filename, generate_pin, get_file
+from print_service.utils import check_pdf_ok, generate_filename, generate_pin, get_file
 
-from print_service.utils import check_pdf_ok
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

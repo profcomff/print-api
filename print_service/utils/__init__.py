@@ -1,3 +1,4 @@
+import io
 import random
 import re
 from datetime import date, datetime, timedelta
@@ -5,15 +6,14 @@ from os.path import abspath, exists
 
 from fastapi import File
 from fastapi.exceptions import HTTPException
+from PyPDF4 import PdfFileReader
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.settings import Settings, get_settings
-from PyPDF4 import PdfFileReader
-import aiofiles
-import io
+
 
 settings: Settings = get_settings()
 

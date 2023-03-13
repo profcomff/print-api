@@ -1,17 +1,18 @@
 import logging
 from typing import List, Optional
 
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi_sqlalchemy import db
 from pydantic import constr
-from sqlalchemy import func, or_, and_
+from sqlalchemy import and_, func, or_
 
 from print_service import __version__
-from print_service.settings import get_settings
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
-from auth_lib.fastapi import UnionAuth
+from print_service.settings import get_settings
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -74,7 +75,7 @@ async def check_union_member(
 @router.post('/is_union_member')
 def update_list(
     input: UpdateUserList,
-    user=Depends(UnionAuth(scopes=["print.user.create", "print.user.update", "print.user.delete"]))
+    user=Depends(UnionAuth(scopes=["print.user.create", "print.user.update", "print.user.delete"])),
 ):
     logger.info(f"User {user} updated list")
 

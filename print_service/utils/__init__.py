@@ -76,5 +76,5 @@ def check_pdf_ok(f: bytes):
     try:
         PdfFileReader(io.BytesIO(f))
         return True
-    except Exception as e:
+    except Exception:
         return False

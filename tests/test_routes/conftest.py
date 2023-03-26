@@ -1,8 +1,9 @@
 import os
+from unittest.mock import Mock
 
 import pytest
-from unittest.mock import Mock
-from print_service.models import UnionMember, File
+
+from print_service.models import File, UnionMember
 
 
 @pytest.fixture(scope='function')

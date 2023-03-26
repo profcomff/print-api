@@ -1,6 +1,8 @@
-import pytest
 import json
+
+import pytest
 from starlette import status
+
 from print_service.models import UnionMember
 from print_service.settings import get_settings
 

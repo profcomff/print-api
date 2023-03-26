@@ -1,7 +1,6 @@
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
-
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from fastapi import HTTPException
@@ -9,9 +8,7 @@ from starlette import status
 
 from print_service.models import File
 from print_service.settings import get_settings
-from print_service.utils import get_file
-
-from print_service.utils import check_pdf_ok
+from print_service.utils import check_pdf_ok, get_file
 
 
 url = '/file'

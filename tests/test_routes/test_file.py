@@ -135,17 +135,6 @@ def test_upload_and_print_encrypted_file(pin_pdf, client):
     assert res2.status_code == status.HTTP_200_OK
 
 
-# def test_generate_filename(union_member_user, client, dbsession):
-#     test_str1 = generate_filename("filepdf.")
-#     assert HTTPException(422, "Unprocessable file instance")
-#     test_str2 = generate_filename("filepdf.412.-.")
-#     assert HTTPException(422, "Unprocessable file instance")
-#     test_str3 = generate_filename("filepdf.421...24")
-#     assert HTTPException(422, "Unprocessable file instance")
-#     test_str4 = generate_filename("filepdf.doc.f.pdf.")
-#     assert HTTPException(422, "Unprocessable file instance")
-
-
 def test_incorrect_filename(union_member_user, client, dbsession):
     body1 = {
         "surname": union_member_user['surname'],

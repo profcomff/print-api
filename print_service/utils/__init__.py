@@ -38,7 +38,11 @@ def generate_pin(session: Session):
 def generate_filename(original_filename: str):
     datestr = date.today().isoformat()
     salt = ''.join(random.choice(settings.PIN_SYMBOLS) for _ in range(128))
-    ext = re.findall(r'\w+', original_filename.split('.')[-1])[0]
+    ext_list = re.findall(r'\w+', original_filename.split('.')[-1])
+    try:
+        ext = ext_list[0]
+    except IndexError:
+        raise HTTPException(422, "Unprocessable file instance")
     return f'{datestr}-{salt}.{ext}'
 
 

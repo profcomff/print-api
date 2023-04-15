@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
+
 from print_service.settings import get_settings
 
 

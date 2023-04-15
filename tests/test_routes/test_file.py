@@ -1,5 +1,7 @@
 import asyncio
+import datetime
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
@@ -8,7 +10,7 @@ from starlette import status
 
 from print_service.models import File
 from print_service.settings import get_settings
-from print_service.utils import check_pdf_ok, get_file
+from print_service.utils import check_pdf_ok, generate_filename, get_file
 
 
 url = '/file'
@@ -131,3 +133,38 @@ def test_upload_and_print_encrypted_file(pin_pdf, client):
     assert res.status_code == status.HTTP_200_OK
     res2 = client.get(f"{url}/{pin}")
     assert res2.status_code == status.HTTP_200_OK
+
+
+def test_incorrect_filename(union_member_user, client, dbsession):
+    body1 = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "filepdf.",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    body2 = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "ffilepdf.412.-.",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    body3 = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "filepdf.421.doc.pdf...24...",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    body4 = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "&^$%#**$@)(",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    res1 = client.post(url, data=json.dumps(body1))
+    assert res1.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    res2 = client.post(url, data=json.dumps(body2))
+    assert res2.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    res3 = client.post(url, data=json.dumps(body3))
+    assert res3.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    res4 = client.post(url, data=json.dumps(body4))
+    assert res4.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

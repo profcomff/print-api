@@ -17,4 +17,3 @@ COPY ./migrations /migrations/
 COPY ./${APP_NAME} /app/${APP_NAME}
 
 COPY ./prestart.sh /app/prestart.sh
-RUN

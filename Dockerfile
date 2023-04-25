@@ -13,7 +13,6 @@ COPY ./alembic.ini /alembic.ini
 COPY ./logging_prod.conf /app/
 COPY ./logging_test.conf /app/
 COPY ./migrations /migrations/
+COPY ./prestart.sh /app/prestart.sh
 
 COPY ./${APP_NAME} /app/${APP_NAME}
-
-COPY ./prestart.sh /app/prestart.sh

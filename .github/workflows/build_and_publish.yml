@@ -107,6 +107,7 @@ jobs:
             --env GUNICORN_CMD_ARGS='--log-config  logging_test.conf' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
+            --env STORAGE_TIME=30 \
             --env AUTH_URL=https://auth.api.test.profcomff.com/ \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
@@ -172,6 +173,7 @@ jobs:
             --env GUNICORN_CMD_ARGS='--log-config  logging_prod.conf' \
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
+            --env STORAGE_TIME=168 \
             --env AUTH_URL=https://auth.api.profcomff.com/ \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

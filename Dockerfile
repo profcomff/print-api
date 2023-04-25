@@ -5,7 +5,7 @@ ENV APP_NAME=print_service
 ENV APP_MODULE=${APP_NAME}.routes.base:app
 
 COPY ./requirements.txt /app/
-RUN pip install -U -r /app/requirements.txt
+RUN apt-get update && apt-get -y install cron && pip install -U -r /app/requirements.txt
 
 COPY ./static /app/static/
 
@@ -13,5 +13,6 @@ COPY ./alembic.ini /alembic.ini
 COPY ./logging_prod.conf /app/
 COPY ./logging_test.conf /app/
 COPY ./migrations /migrations/
+COPY ./prestart.sh /app/prestart.sh
 
 COPY ./${APP_NAME} /app/${APP_NAME}

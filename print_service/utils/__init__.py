@@ -12,6 +12,7 @@ from sqlalchemy.orm.session import Session
 
 from print_service.models import File
 from print_service.models import File as FileModel
+from print_service.models import PrintFact
 from print_service.settings import Settings, get_settings
 
 
@@ -72,12 +73,15 @@ def get_file(dbsession, pin: str or list[str]):
                 },
             }
         )
+        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id)
+        dbsession.add(file_model)
+        dbsession.commit()
     return result
 
 
-def check_pdf_ok(f: bytes):
+def check_pdf_ok(f: bytes) -> bool | int:
     try:
-        PdfFileReader(io.BytesIO(f))
-        return True
+        pdf_file = PdfFileReader(io.BytesIO(f))
+        return True, pdf_file.getNumPages()
     except Exception:
-        return False
+        return False, 0

@@ -91,8 +91,8 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
 
 
 def test_file_check():
-    assert check_pdf_ok(open("tests/test_routes/test_files/broken.pdf", "rb").read()) is False
-    assert check_pdf_ok(open("tests/test_routes/test_files/correct.pdf", "rb").read()) is True
+    assert check_pdf_ok(open("tests/test_routes/test_files/broken.pdf", "rb").read())[0] is False
+    assert check_pdf_ok(open("tests/test_routes/test_files/correct.pdf", "rb").read())[0] is True
 
 
 def test_upload_and_print_correct_pdf(pin_pdf, client):
@@ -130,9 +130,9 @@ def test_upload_and_print_encrypted_file(pin_pdf, client):
     fileName = 'tests/test_routes/test_files/encrypted.pdf'
     files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
     res = client.post(f"{url}/{pin}", files=files)
-    assert res.status_code == status.HTTP_200_OK
+    assert res.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
     res2 = client.get(f"{url}/{pin}")
-    assert res2.status_code == status.HTTP_200_OK
+    assert res2.status_code == status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
 
 
 def test_incorrect_filename(union_member_user, client, dbsession):

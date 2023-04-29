@@ -23,6 +23,7 @@ class UnionMember(Model):
     student_number: Mapped[str] = mapped_column(String, nullable=True)
 
     files: Mapped[list[File]] = relationship('File', back_populates='owner')
+    print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='owner')
 
 
 class File(Model):
@@ -39,5 +40,19 @@ class File(Model):
     updated_at: Mapped[datetime] = Column(
         DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    number_of_pages: Mapped[int] = Column(Integer)
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')
+    print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')
+
+
+class PrintFact(Model):
+    __tablename__ = 'print_fact'
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    file_id: Mapped[int] = Column(Integer, ForeignKey('file.id'), nullable=False)
+    owner_id: Mapped[int] = Column(Integer, ForeignKey('union_member.id'), nullable=False)
+    created_at: Mapped[datetime] = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='print_facts')
+    file: Mapped[File] = relationship('File', back_populates='print_facts')

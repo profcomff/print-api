@@ -15,7 +15,7 @@ from print_service.models import File as FileModel
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from print_service.utils import check_pdf_ok, generate_filename, generate_pin, get_file
+from print_service.utils import checking_for_pdf, generate_filename, generate_pin, get_file
 
 
 logger = logging.getLogger(__name__)
@@ -173,7 +173,7 @@ async def upload_file(
         if len(memory_file) > settings.MAX_SIZE:
             raise HTTPException(413, f'Content too large, {settings.MAX_SIZE} bytes allowed')
         await saved_file.write(memory_file)
-    pdf_ok, number_of_pages = check_pdf_ok(memory_file)
+    pdf_ok, number_of_pages = checking_for_pdf(memory_file)
     file_model.number_of_pages = number_of_pages
     db.session.commit()
     if not pdf_ok:

@@ -79,7 +79,16 @@ def get_file(dbsession, pin: str or list[str]):
     return result
 
 
-def check_pdf_ok(f: bytes) -> bool | int:
+def checking_for_pdf(f: bytes) -> tuple[bool, int]:
+    """_summary_
+
+    Args:
+        f (bytes): file to check
+
+    Returns:
+        tuple[bool, int]: The first argument returns whether the file is a valid pdf.
+        The second argument returns the number of pages in the pdf document (0- if the check failed)
+    """
     try:
         pdf_file = PdfFileReader(io.BytesIO(f))
         return True, pdf_file.getNumPages()

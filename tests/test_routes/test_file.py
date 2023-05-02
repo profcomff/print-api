@@ -1,8 +1,4 @@
-import asyncio
-import datetime
 import json
-import time
-from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from fastapi import HTTPException
@@ -10,7 +6,7 @@ from starlette import status
 
 from print_service.models import File
 from print_service.settings import get_settings
-from print_service.utils import check_pdf_ok, generate_filename, get_file
+from print_service.utils import checking_for_pdf, get_file
 
 
 url = '/file'
@@ -91,8 +87,8 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
 
 
 def test_file_check():
-    assert check_pdf_ok(open("tests/test_routes/test_files/broken.pdf", "rb").read())[0] is False
-    assert check_pdf_ok(open("tests/test_routes/test_files/correct.pdf", "rb").read())[0] is True
+    assert checking_for_pdf(open("tests/test_routes/test_files/broken.pdf", "rb").read()) == (False, 0)
+    assert checking_for_pdf(open("tests/test_routes/test_files/correct.pdf", "rb").read()) == (True, 2)
 
 
 def test_upload_and_print_correct_pdf(pin_pdf, client):

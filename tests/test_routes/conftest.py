@@ -1,5 +1,4 @@
 import os
-from unittest.mock import Mock
 
 import pytest
 
@@ -36,10 +35,10 @@ def uploaded_file_db(dbsession, union_member_user, client):
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
     yield db_file
     file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
-    if file is not None:
-        dbsession.query(PrintFact).filter(PrintFact.file_id == file.id).delete()
-        dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
-        dbsession.commit()
+    assert file is not None
+    dbsession.query(PrintFact).filter(PrintFact.file_id == file.id).delete()
+    dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
+    dbsession.commit()
 
 
 @pytest.fixture
@@ -62,7 +61,7 @@ def pin_pdf(dbsession, union_member_user, client):
     pin = res.json()['pin']
     yield pin
     file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
-    if file is not None:
-        dbsession.query(PrintFact).filter(PrintFact.file_id == file.id).delete()
-        dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
-        dbsession.commit()
+    assert file is not None
+    dbsession.query(PrintFact).filter(PrintFact.file_id == file.id).delete()
+    dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
+    dbsession.commit()

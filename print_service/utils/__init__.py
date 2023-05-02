@@ -12,6 +12,7 @@ from sqlalchemy.orm.session import Session
 
 from print_service.models import File
 from print_service.models import File as FileModel
+from print_service.models import PrintFact
 from print_service.settings import Settings, get_settings
 
 
@@ -72,12 +73,24 @@ def get_file(dbsession, pin: str or list[str]):
                 },
             }
         )
+        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id)
+        dbsession.add(file_model)
+        dbsession.commit()
     return result
 
 
-def check_pdf_ok(f: bytes):
+def checking_for_pdf(f: bytes) -> tuple[bool, int]:
+    """_summary_
+
+    Args:
+        f (bytes): file to check
+
+    Returns:
+        tuple[bool, int]: The first argument returns whether the file is a valid pdf.
+        The second argument returns the number of pages in the pdf document (0- if the check failed)
+    """
     try:
-        PdfFileReader(io.BytesIO(f))
-        return True
+        pdf_file = PdfFileReader(io.BytesIO(f))
+        return True, pdf_file.getNumPages()
     except Exception:
-        return False
+        return False, 0

@@ -1,9 +1,8 @@
 import os
-from unittest.mock import Mock
 
 import pytest
 
-from print_service.models import File, UnionMember
+from print_service.models import File, PrintFact, UnionMember
 
 
 @pytest.fixture(scope='function')
@@ -19,6 +18,7 @@ def union_member_user(dbsession):
     yield union_member
     db_user = dbsession.query(UnionMember).filter(UnionMember.id == union_member['id']).one_or_none()
     assert db_user is not None
+    dbsession.query(PrintFact).filter(PrintFact.owner_id == union_member['id']).delete()
     dbsession.query(UnionMember).filter(UnionMember.id == union_member['id']).delete()
     dbsession.commit()
 
@@ -34,6 +34,9 @@ def uploaded_file_db(dbsession, union_member_user, client):
     res = client.post('/file', json=body)
     db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
     yield db_file
+    file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
+    assert file is not None
+    dbsession.query(PrintFact).filter(PrintFact.file_id == file.id).delete()
     dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
     dbsession.commit()
 
@@ -57,5 +60,8 @@ def pin_pdf(dbsession, union_member_user, client):
     res = client.post('/file', json=body)
     pin = res.json()['pin']
     yield pin
+    file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
+    assert file is not None
+    dbsession.query(PrintFact).filter(PrintFact.file_id == file.id).delete()
     dbsession.query(File).filter(File.pin == res.json()['pin']).delete()
     dbsession.commit()

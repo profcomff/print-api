@@ -89,6 +89,12 @@ def update_list(
             400, {"status": "error", "detail": "Duplicates by union_numbers or student_numbers"}
         )
 
+    db_user_all = db.session.query(UnionMember).all()
+    deleted_user_list = [user for user in db_user_all if user not in input.users]
+
+    for user in deleted_user_list:
+        user.is_deleted = True
+
     for user in input.users:
         db_user: UnionMember = (
             db.session.query(UnionMember)
@@ -111,6 +117,7 @@ def update_list(
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
+            db_user.is_deleted = False
         else:
             db.session.add(
                 UnionMember(

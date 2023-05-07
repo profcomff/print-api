@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String, Boolean
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import Boolean
 
 
 @as_declarative()
@@ -21,6 +20,7 @@ class UnionMember(Model):
     surname: Mapped[str] = mapped_column(String, nullable=False)
     union_number: Mapped[str] = mapped_column(String, nullable=True)
     student_number: Mapped[str] = mapped_column(String, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     files: Mapped[list[File]] = relationship('File', back_populates='owner')
 

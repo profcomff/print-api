@@ -196,4 +196,3 @@ def test_upload_big_file(pin_pdf, client):
     res8 = client.patch(f"{url}/{pin_pdf}", json=payload4)
     assert res8.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
     get_settings().MAX_PAGE_COUNT = max_page
-

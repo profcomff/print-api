@@ -191,5 +191,9 @@ def test_upload_big_file(pin_pdf, client):
     get_settings().MAX_PAGE_COUNT = 4
     res7 = client.patch(f"{url}/{pin_pdf}", json=payload3)
     assert res7.status_code == status.HTTP_200_OK
-    get_settings().MAX_PAGE_COUNT = 6
-    payload4 = {"options": {"pages": "1-5, 3", "copies": 1, "two_sided": False}}
+    get_settings().MAX_PAGE_COUNT = 2
+    payload4 = {"options": {"pages": "1, 1, 1", "copies": 1, "two_sided": False}}
+    res8 = client.patch(f"{url}/{pin_pdf}", json=payload4)
+    assert res8.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    get_settings().MAX_PAGE_COUNT = max_page
+

@@ -1,4 +1,5 @@
 import io
+import math
 import random
 import re
 from datetime import date, datetime, timedelta
@@ -114,6 +115,6 @@ def checking_for_page_count(page: str, two_side_print: bool, copy_count: int, nu
         x = part.split('-')
         result.update(range(int(x[0]), int(x[-1]) + 1))
     if two_side_print:
-        return (len(result) // 2 + 1) * copy_count
+        return math.ceil(len(result) / 2) * copy_count
     else:
         return len(result) * copy_count

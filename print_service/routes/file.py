@@ -194,6 +194,7 @@ async def upload_file(
         )
         > settings.MAX_PAGE_COUNT
     ):
+        await aiofiles.os.remove(path)
         raise HTTPException(
             413, f'Content too large, count of page: {settings.MAX_PAGE_COUNT} is allowed'
         )

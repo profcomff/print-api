@@ -191,4 +191,5 @@ def test_upload_big_file(pin_pdf, client):
     get_settings().MAX_PAGE_COUNT = 4
     res7 = client.patch(f"{url}/{pin_pdf}", json=payload3)
     assert res7.status_code == status.HTTP_200_OK
-    get_settings().MAX_PAGE_COUNT = max_page
+    get_settings().MAX_PAGE_COUNT = 6
+    payload4 = {"options": {"pages": "1-5, 3", "copies": 1, "two_sided": False}}

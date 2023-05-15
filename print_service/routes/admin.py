@@ -5,6 +5,7 @@ from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends, HTTPException
 from redis import Redis
 
+from print_service.exceptions import TerminalNotFound
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 
@@ -52,7 +53,7 @@ async def manual_update_terminal(
         sender.redis.close()
         return {'status': 'ok'}
     sender.redis.close()
-    raise HTTPException(400, 'Terminal not found by token')
+    raise TerminalNotFound('token')
 
 
 @router.post("/reboot")
@@ -65,4 +66,4 @@ async def reboot_terminal(
         sender.redis.close()
         return {'status': 'ok'}
     sender.redis.close()
-    raise HTTPException(400, 'Terminal not found by token')
+    raise TerminalNotFound('token')

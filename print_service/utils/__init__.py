@@ -11,6 +11,7 @@ from PyPDF4 import PdfFileReader
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
+from print_service.exceptions import InvalidPageRequest
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.models import PrintFact
@@ -75,13 +76,10 @@ def get_file(dbsession, pin: str or list[str]):
             }
         )
         _, number_of_pages = checking_for_pdf(f)
-        file_model = PrintFact(
-            file_id=f.id,
-            owner_id=f.owner_id,
-            sheet_used=checking_for_page_count(
-                f.option_pages, f.option_two_sided, f.option_copies, number_of_pages
-            ),
-        )
+        if f.flatten_pages:
+            if number_of_pages > max(f.flatten_pages):
+                raise InvalidPageRequest
+        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count)
         dbsession.add(file_model)
         dbsession.commit()
     return result
@@ -102,19 +100,3 @@ def checking_for_pdf(f: bytes) -> tuple[bool, int]:
         return True, pdf_file.getNumPages()
     except Exception:
         return False, 0
-
-
-def checking_for_page_count(page: str, two_side_print: bool, copy_count: int, num_of_page: int) -> int:
-    if page == '':
-        if two_side_print:
-            return (num_of_page // 2 + 1) * copy_count
-        else:
-            return num_of_page * copy_count
-    result = set()
-    for part in page.split(','):
-        x = part.split('-')
-        result.update(range(int(x[0]), int(x[-1]) + 1))
-    if two_side_print:
-        return math.ceil(len(result) / 2) * copy_count
-    else:
-        return len(result) * copy_count

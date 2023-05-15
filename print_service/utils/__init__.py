@@ -73,7 +73,14 @@ def get_file(dbsession, pin: str or list[str]):
                 },
             }
         )
-        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id)
+        _, number_of_pages = checking_for_pdf(f)
+        file_model = PrintFact(
+            file_id=f.id,
+            owner_id=f.owner_id,
+            sheet_used=checking_for_page_count(
+                f.option_pages, f.option_two_sided, f.option_copies, number_of_pages
+            ),
+        )
         dbsession.add(file_model)
         dbsession.commit()
     return result
@@ -94,3 +101,19 @@ def checking_for_pdf(f: bytes) -> tuple[bool, int]:
         return True, pdf_file.getNumPages()
     except Exception:
         return False, 0
+
+
+def checking_for_page_count(page: str, two_side_print: bool, copy_count: int, num_of_page: int) -> int:
+    if page == '':
+        if two_side_print:
+            return (num_of_page // 2 + 1) * copy_count
+        else:
+            return num_of_page * copy_count
+    result = set()
+    for part in page.split(','):
+        x = part.split('-')
+        result.update(range(int(x[0]), int(x[-1]) + 1))
+    if two_side_print:
+        return (len(result) // 2 + 1) * copy_count
+    else:
+        return len(result) * copy_count

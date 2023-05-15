@@ -15,7 +15,13 @@ from print_service.models import File as FileModel
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
-from print_service.utils import checking_for_pdf, generate_filename, generate_pin, get_file
+from print_service.utils import (
+    checking_for_page_count,
+    checking_for_pdf,
+    generate_filename,
+    generate_pin,
+    get_file,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -157,7 +163,6 @@ async def upload_file(
     )
     if not file_model:
         raise HTTPException(404, f'Pin {pin} not found')
-
     if file.content_type not in settings.CONTENT_TYPES:
         raise HTTPException(
             415,
@@ -179,6 +184,19 @@ async def upload_file(
     if not pdf_ok:
         await aiofiles.os.remove(path)
         raise HTTPException(415, 'File corrupted')
+
+    if (
+        checking_for_page_count(
+            file_model.option_pages,
+            file_model.option_two_sided,
+            file_model.option_copies,
+            file_model.number_of_pages,
+        )
+        > settings.MAX_PAGE_COUNT
+    ):
+        raise HTTPException(
+            413, f'Content too large, count of page: {settings.MAX_PAGE_COUNT} is allowed'
+        )
     await file.close()
 
     return {
@@ -221,6 +239,18 @@ async def update_file_options(
         v if (v := options.get('two_sided')) is not None else file_model.option_two_sided
     )
     db.session.commit()
+    if (
+        checking_for_page_count(
+            file_model.option_pages,
+            file_model.option_two_sided,
+            file_model.option_copies,
+            file_model.number_of_pages,
+        )
+        > settings.MAX_PAGE_COUNT
+    ):
+        raise HTTPException(
+            413, f'Content too large, count of page: {settings.MAX_PAGE_COUNT} is allowed'
+        )
     return {
         'pin': file_model.pin,
         'options': {

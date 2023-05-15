@@ -56,3 +56,5 @@ class PrintFact(Model):
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='print_facts')
     file: Mapped[File] = relationship('File', back_populates='print_facts')
+
+    sheet_used: Mapped[int] = Column(Integer, nullable=False)

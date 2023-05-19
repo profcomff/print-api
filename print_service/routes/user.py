@@ -63,7 +63,7 @@ async def check_union_member(
         return bool(user)
 
     if not user:
-        raise UserNotFound
+        raise UserNotFound()
     else:
         return {
             'surname': user.surname,
@@ -86,7 +86,7 @@ def update_list(
     if len(union_numbers) != len(set(union_numbers)) or len(student_numbers) != len(
         set(student_numbers)
     ):
-        raise UnionStudentDuplicate
+        raise UnionStudentDuplicate()
 
     for user in input.users:
         db_user: UnionMember = (

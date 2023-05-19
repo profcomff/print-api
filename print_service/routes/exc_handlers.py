@@ -5,16 +5,20 @@ from print_service.base import StatusResponseModel
 from print_service.exceptions import (
     AlreadyUpload,
     FileIsNotReceived,
+    FileNotFound,
     InvalidPageRequest,
     InvalidType,
     IsCorrupt,
+    IsNotUpload,
     NotInUnion,
     PINGenerateError,
     PINNotFound,
-    TerminalNotFound,
+    TerminalQRNotFound,
+    TerminalTokenNotFound,
     TooLargeSize,
     TooManyPages,
     UnionStudentDuplicate,
+    UnprocessableFileInstance,
     UserNotFound,
 )
 from print_service.routes.base import app
@@ -41,71 +45,103 @@ async def invalid_format(req: starlette.requests.Request, exc: TooManyPages):
     )
 
 
-@app.exception_handler(TerminalNotFound)
-async def invalid_format(req: starlette.requests.Request, exc: TerminalNotFound):
+@app.exception_handler(TerminalQRNotFound)
+async def terminal_not_found(req: starlette.requests.Request, exc: TerminalQRNotFound):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=400
+        content=StatusResponseModel(status="Error", message=f"Terminal not found by QR").dict(),
+        status_code=400,
+    )
+
+
+@app.exception_handler(TerminalTokenNotFound)
+async def terminal_not_found(req: starlette.requests.Request, exc: TerminalTokenNotFound):
+    return JSONResponse(
+        content=StatusResponseModel(status="Error", message=f"Terminal not found by token").dict(),
+        status_code=400,
     )
 
 
 @app.exception_handler(UserNotFound)
-async def invalid_format(req: starlette.requests.Request, exc: UserNotFound):
+async def user_not_found(req: starlette.requests.Request, exc: UserNotFound):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=404
+        content=StatusResponseModel(status="Error", message=f"User not found").dict(), status_code=404
     )
 
 
 @app.exception_handler(UnionStudentDuplicate)
-async def invalid_format(req: starlette.requests.Request, exc: UnionStudentDuplicate):
+async def student_duplicate(req: starlette.requests.Request, exc: UnionStudentDuplicate):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=400
     )
 
 
 @app.exception_handler(NotInUnion)
-async def invalid_format(req: starlette.requests.Request, exc: NotInUnion):
+async def not_in_union(req: starlette.requests.Request, exc: NotInUnion):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=403
     )
 
 
 @app.exception_handler(PINGenerateError)
-async def invalid_format(req: starlette.requests.Request, exc: PINGenerateError):
+async def generate_error(req: starlette.requests.Request, exc: PINGenerateError):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=500
     )
 
 
 @app.exception_handler(FileIsNotReceived)
-async def invalid_format(req: starlette.requests.Request, exc: FileIsNotReceived):
+async def file_not_received(req: starlette.requests.Request, exc: FileIsNotReceived):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=400
     )
 
 
 @app.exception_handler(PINNotFound)
-async def invalid_format(req: starlette.requests.Request, exc: PINNotFound):
+async def pin_not_found(req: starlette.requests.Request, exc: PINNotFound):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=404
+        content=StatusResponseModel(status="Error", message=f"Pin {exc.pin} not found").dict(),
+        status_code=404,
     )
 
 
 @app.exception_handler(InvalidType)
-async def invalid_format(req: starlette.requests.Request, exc: InvalidType):
+async def invalid_type(req: starlette.requests.Request, exc: InvalidType):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
     )
 
 
 @app.exception_handler(AlreadyUpload)
-async def invalid_format(req: starlette.requests.Request, exc: AlreadyUpload):
+async def already_upload(req: starlette.requests.Request, exc: AlreadyUpload):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
     )
 
 
 @app.exception_handler(IsCorrupt)
-async def invalid_format(req: starlette.requests.Request, exc: IsCorrupt):
+async def is_corrupt(req: starlette.requests.Request, exc: IsCorrupt):
+    return JSONResponse(
+        content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
+    )
+
+
+@app.exception_handler(UnprocessableFileInstance)
+async def unprocessable_file(req: starlette.requests.Request, exc: UnprocessableFileInstance):
+    return JSONResponse(
+        content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=422
+    )
+
+
+@app.exception_handler(FileNotFound)
+async def unprocessable_file(req: starlette.requests.Request, exc: FileNotFound):
+    return JSONResponse(
+        content=StatusResponseModel(status="Error", message=f"{exc.count} file(s) not found").dict(),
+        status_code=404,
+    )
+
+
+@app.exception_handler(IsNotUpload)
+async def not_upload(req: starlette.requests.Request, exc: IsNotUpload):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
     )

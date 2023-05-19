@@ -16,7 +16,7 @@ class Settings(UnionAuthSettings, BaseSettings):
 
     CONTENT_TYPES: List[str] = ['application/pdf']
     MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах
-    MAX_PAGE_COUNT: int = 5
+    MAX_PAGE_COUNT: int = 20
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
     STATIC_FOLDER: DirectoryPath | None
 

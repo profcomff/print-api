@@ -22,6 +22,8 @@ from print_service.exceptions import (
     PINNotFound,
     TooLargeSize,
     TooManyPages,
+    UnprocessableFileInstance,
+    UserNotFound,
 )
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
@@ -118,12 +120,15 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
         func.upper(UnionMember.surname) == inp.surname.upper(),
     ).one_or_none()
     if not user:
-        raise NotInUnion
+        raise NotInUnion()
     try:
         pin = generate_pin(db.session)
     except RuntimeError:
         raise PINGenerateError
-    filename = generate_filename(inp.filename)
+    try:
+        filename = generate_filename(inp.filename)
+    except UnprocessableFileInstance as ex:
+        raise ex
     file_model = FileModel(pin=pin, file=filename)
     file_model.owner = user
     file_model.option_copies = inp.options.copies
@@ -160,7 +165,7 @@ async def upload_file(
     (меняется в настройках сервера).
     """
     if file == ...:
-        raise FileIsNotReceived
+        raise FileIsNotReceived()
     file_model = (
         db.session.query(FileModel)
         .filter(func.upper(FileModel.pin) == pin.upper())
@@ -170,29 +175,29 @@ async def upload_file(
     if not file_model:
         raise PINNotFound(pin)
     if file.content_type not in settings.CONTENT_TYPES:
-        raise InvalidType
+        raise InvalidType()
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if exists(path):
-        raise AlreadyUpload
+        raise AlreadyUpload()
 
     async with aiofiles.open(path, 'wb') as saved_file:
         memory_file = await file.read()
         if len(memory_file) > settings.MAX_SIZE:
-            raise TooLargeSize
+            raise TooLargeSize()
         await saved_file.write(memory_file)
     pdf_ok, number_of_pages = checking_for_pdf(memory_file)
     file_model.number_of_pages = number_of_pages
     db.session.commit()
     if not pdf_ok:
         await aiofiles.os.remove(path)
-        raise IsCorrupt
+        raise IsCorrupt()
     if file_model.flatten_pages:
         if number_of_pages < max(file_model.flatten_pages):
             await aiofiles.os.remove(path)
-            raise InvalidPageRequest
+            raise InvalidPageRequest()
     if file_model.sheets_count > settings.MAX_PAGE_COUNT:
         await aiofiles.os.remove(path)
-        raise TooManyPages
+        raise TooManyPages()
     await file.close()
 
     return {
@@ -239,7 +244,7 @@ async def update_file_options(
         if file_model.number_of_pages < max(file_model.flatten_pages):
             raise InvalidPageRequest
     if file_model.sheets_count > settings.MAX_PAGE_COUNT:
-        raise TooManyPages
+        raise TooManyPages()
     return {
         'pin': file_model.pin,
         'options': {

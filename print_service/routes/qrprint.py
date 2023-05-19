@@ -9,7 +9,7 @@ from fastapi_sqlalchemy import db
 from pydantic import conlist
 from redis import Redis
 
-from print_service.exceptions import TerminalNotFound
+from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUpload, TerminalQRNotFound
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import get_file
@@ -38,7 +38,10 @@ class InstantPrintSender:
         old = self.redis.get(terminal)
         if old:
             return None
-        files = get_file(db.session, files)
+        try:
+            files = get_file(db.session, files)
+        except (FileNotFound, IsNotUpload, InvalidPageRequest) as ex:
+            raise ex
         self.redis.set(terminal, json.dumps({'files': files}))
         return files
 
@@ -93,7 +96,7 @@ async def instant_print(options: InstantPrintCreate):
     options.qr_token = options.qr_token.removeprefix(settings.QR_TOKEN_PREFIX)
     if redis_conn.send(**options.dict()):
         return {'status': 'ok'}
-    raise TerminalNotFound('QR')
+    raise TerminalQRNotFound()
 
 
 @router.websocket("")

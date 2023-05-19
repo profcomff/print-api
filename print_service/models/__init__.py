@@ -63,10 +63,10 @@ class File(Model):
         if self.number_of_pages is None:
             return None
         if not self.flatten_pages:
-            if self.option_two_sided:
-                return (self.number_of_pages // 2 + 1) * self.option_copies
-            else:
-                return self.number_of_pages * self.option_copies
+            return (
+                math.ceil(self.number_of_pages - (self.option_two_sided * self.number_of_pages / 2))
+                * self.option_copies
+            )
         if self.option_two_sided:
             return math.ceil(len(self.flatten_pages) / 2) * self.option_copies
         else:

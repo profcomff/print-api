@@ -4,6 +4,36 @@ from print_service.settings import get_settings
 settings = get_settings()
 
 
+class ObjectNotFound(Exception):
+    def __init__(self):
+        pass
+
+
+class TerminalTokenNotFound(ObjectNotFound):
+    def __init__(self):
+        pass
+
+
+class TerminalQRNotFound(ObjectNotFound):
+    def __init__(self):
+        pass
+
+
+class PINNotFound(ObjectNotFound):
+    def __init__(self, pin: str):
+        self.pin = pin
+
+
+class UserNotFound(ObjectNotFound):
+    def __init__(self):
+        pass
+
+
+class FileNotFound(ObjectNotFound):
+    def __init__(self, count: int):
+        self.count = count
+
+
 class TooManyPages(Exception):
     def __init__(self):
         super().__init__(f'Content too large, count of page: {settings.MAX_PAGE_COUNT} is allowed')
@@ -17,16 +47,6 @@ class TooLargeSize(Exception):
 class InvalidPageRequest(Exception):
     def __init__(self):
         super().__init__(f'Invalid format')
-
-
-class TerminalNotFound(Exception):
-    def __init__(self, type: str):
-        super().__init__(f'Terminal is not found by {type}')
-
-
-class UserNotFound(Exception):
-    def __init__(self):
-        super().__init__(f'User is not found')
 
 
 class UnionStudentDuplicate(Exception):
@@ -49,11 +69,6 @@ class FileIsNotReceived(Exception):
         super().__init__(f'No file was recieved')
 
 
-class PINNotFound(Exception):
-    def __init__(self, pin: str):
-        super().__init__(f'Pin {pin} is not found')
-
-
 class InvalidType(Exception):
     def __init__(self, content_type: str):
         super().__init__(
@@ -69,3 +84,13 @@ class AlreadyUpload(Exception):
 class IsCorrupt(Exception):
     def __init__(self):
         super().__init__(f'File is corrupted')
+
+
+class IsNotUpload(Exception):
+    def __init__(self):
+        super().__init__(f'File has not been uploaded yet')
+
+
+class UnprocessableFileInstance(Exception):
+    def __init__(self):
+        super().__init__(f'Unprocessable file instance')

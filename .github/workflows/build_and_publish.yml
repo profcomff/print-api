@@ -108,6 +108,7 @@ jobs:
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
             --env STORAGE_TIME=30 \
+            --env MAX_PAGE_COUNT=20 \
             --env AUTH_URL=https://auth.api.test.profcomff.com/ \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
@@ -174,6 +175,7 @@ jobs:
             --env ALLOW_STUDENT_NUMBER=true \
             --env STATIC_FOLDER=/app/static \
             --env STORAGE_TIME=168 \
+            --env MAX_PAGE_COUNT=20 \
             --env AUTH_URL=https://auth.api.profcomff.com/ \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

@@ -14,7 +14,7 @@ from sqlalchemy.orm.session import Session
 from print_service.exceptions import (
     FileNotFound,
     InvalidPageRequest,
-    IsNotUpload,
+    IsNotUploaded,
     UnprocessableFileInstance,
 )
 from print_service.models import File
@@ -69,7 +69,7 @@ def get_file(dbsession, pin: str or list[str]):
     for f in files:
         path = abspath(settings.STATIC_FOLDER) + '/' + f.file
         if not exists(path):
-            raise IsNotUpload()
+            raise IsNotUploaded()
 
         result.append(
             {

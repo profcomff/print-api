@@ -47,7 +47,9 @@ class File(Model):
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')
 
     @property
-    def flatten_pages(self) -> list | None:
+    def flatten_pages(self) -> list[int] | None:
+        ''' Формирует и возвращает, учитывая интервалы, список, содержащий числа, из строки вида
+        "1-5, 3, 2"'''
         if self.number_of_pages is None:
             return None
         result = list()
@@ -60,6 +62,8 @@ class File(Model):
 
     @property
     def sheets_count(self) -> int | None:
+        '''Возвращает, учитывая интервалы, количество чисел, полученных из строки вида
+        "1-5, 3, 2"'''
         if self.number_of_pages is None:
             return None
         if not self.flatten_pages:

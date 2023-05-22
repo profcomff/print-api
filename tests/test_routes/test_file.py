@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException
 from starlette import status
 
-from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUpload
+from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded
 from print_service.models import File
 from print_service.settings import get_settings
 from print_service.utils import checking_for_pdf, get_file
@@ -57,14 +57,14 @@ def test_get_file_wrong_pin(uploaded_file_os, client):
 
 
 def test_get_file_func_1_not_exists(dbsession):
-    with pytest.raises((FileNotFound, IsNotUpload, InvalidPageRequest)):
+    with pytest.raises((FileNotFound, IsNotUploaded, InvalidPageRequest)):
         get_file(dbsession, ['1'])
         assert FileNotFound
     dbsession.commit()
 
 
 def test_get_file_func_1_not_uploaded(dbsession, uploaded_file_db):
-    with pytest.raises((FileNotFound, IsNotUpload, InvalidPageRequest)):
+    with pytest.raises((FileNotFound, IsNotUploaded, InvalidPageRequest)):
         data = get_file(dbsession, [uploaded_file_db.pin])
     dbsession.commit()
 
@@ -84,7 +84,7 @@ def test_get_file_func_1_ok(dbsession, uploaded_file_os):
 
 
 def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
-    with pytest.raises((FileNotFound, IsNotUpload, InvalidPageRequest)):
+    with pytest.raises((FileNotFound, IsNotUploaded, InvalidPageRequest)):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])
 
 

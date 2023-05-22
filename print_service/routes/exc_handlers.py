@@ -3,13 +3,13 @@ from starlette.responses import JSONResponse
 
 from print_service.base import StatusResponseModel
 from print_service.exceptions import (
-    AlreadyUpload,
+    AlreadyUploaded,
     FileIsNotReceived,
     FileNotFound,
     InvalidPageRequest,
     InvalidType,
-    IsCorrupt,
-    IsNotUpload,
+    IsCorrupted,
+    IsNotUploaded,
     NotInUnion,
     PINGenerateError,
     PINNotFound,
@@ -111,37 +111,37 @@ async def invalid_type(req: starlette.requests.Request, exc: InvalidType):
     )
 
 
-@app.exception_handler(AlreadyUpload)
-async def already_upload(req: starlette.requests.Request, exc: AlreadyUpload):
+@app.exception_handler(AlreadyUploaded)
+async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
     )
 
 
-@app.exception_handler(IsCorrupt)
-async def is_corrupt(req: starlette.requests.Request, exc: IsCorrupt):
+@app.exception_handler(IsCorrupted)
+async def is_corrupted(req: starlette.requests.Request, exc: IsCorrupted):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
     )
 
 
 @app.exception_handler(UnprocessableFileInstance)
-async def unprocessable_file(req: starlette.requests.Request, exc: UnprocessableFileInstance):
+async def unprocessable_file_instance(req: starlette.requests.Request, exc: UnprocessableFileInstance):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=422
     )
 
 
 @app.exception_handler(FileNotFound)
-async def unprocessable_file(req: starlette.requests.Request, exc: FileNotFound):
+async def file_not_found(req: starlette.requests.Request, exc: FileNotFound):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc.count} file(s) not found").dict(),
         status_code=404,
     )
 
 
-@app.exception_handler(IsNotUpload)
-async def not_upload(req: starlette.requests.Request, exc: IsNotUpload):
+@app.exception_handler(IsNotUploaded)
+async def not_uploaded(req: starlette.requests.Request, exc: IsNotUploaded):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}").dict(), status_code=415
     )

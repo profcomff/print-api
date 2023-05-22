@@ -12,11 +12,11 @@ from pydantic import Field, validator
 from sqlalchemy import func, or_
 
 from print_service.exceptions import (
-    AlreadyUpload,
+    AlreadyUploaded,
     FileIsNotReceived,
     InvalidPageRequest,
     InvalidType,
-    IsCorrupt,
+    IsCorrupted,
     NotInUnion,
     PINGenerateError,
     PINNotFound,
@@ -125,10 +125,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
         pin = generate_pin(db.session)
     except RuntimeError:
         raise PINGenerateError
-    try:
-        filename = generate_filename(inp.filename)
-    except UnprocessableFileInstance as ex:
-        raise ex
+    filename = generate_filename(inp.filename)
     file_model = FileModel(pin=pin, file=filename)
     file_model.owner = user
     file_model.option_copies = inp.options.copies
@@ -173,16 +170,19 @@ async def upload_file(
         .one_or_none()
     )
     if not file_model:
+        await file.close()
         raise PINNotFound(pin)
     if file.content_type not in settings.CONTENT_TYPES:
         raise InvalidType()
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if exists(path):
-        raise AlreadyUpload()
+        await file.close()
+        raise AlreadyUploaded()
 
     async with aiofiles.open(path, 'wb') as saved_file:
         memory_file = await file.read()
         if len(memory_file) > settings.MAX_SIZE:
+            await file.close()
             raise TooLargeSize()
         await saved_file.write(memory_file)
     pdf_ok, number_of_pages = checking_for_pdf(memory_file)
@@ -190,13 +190,16 @@ async def upload_file(
     db.session.commit()
     if not pdf_ok:
         await aiofiles.os.remove(path)
-        raise IsCorrupt()
+        await file.close()
+        raise IsCorrupted()
     if file_model.flatten_pages:
         if number_of_pages < max(file_model.flatten_pages):
             await aiofiles.os.remove(path)
+            await file.close()
             raise InvalidPageRequest()
     if file_model.sheets_count > settings.MAX_PAGE_COUNT:
         await aiofiles.os.remove(path)
+        await file.close()
         raise TooManyPages()
     await file.close()
 

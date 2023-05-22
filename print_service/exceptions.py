@@ -76,17 +76,17 @@ class InvalidType(Exception):
         )
 
 
-class AlreadyUpload(Exception):
+class AlreadyUploaded(Exception):
     def __init__(self):
         super().__init__(f'File has been already uploaded')
 
 
-class IsCorrupt(Exception):
+class IsCorrupted(Exception):
     def __init__(self):
         super().__init__(f'File is corrupted')
 
 
-class IsNotUpload(Exception):
+class IsNotUploaded(Exception):
     def __init__(self):
         super().__init__(f'File has not been uploaded yet')
 

@@ -46,7 +46,7 @@ async def invalid_format(req: starlette.requests.Request, exc: TooManyPages):
 
 
 @app.exception_handler(TerminalQRNotFound)
-async def terminal_not_found(req: starlette.requests.Request, exc: TerminalQRNotFound):
+async def terminal_not_found_by_qr(req: starlette.requests.Request, exc: TerminalQRNotFound):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"Terminal not found by QR").dict(),
         status_code=400,
@@ -54,7 +54,7 @@ async def terminal_not_found(req: starlette.requests.Request, exc: TerminalQRNot
 
 
 @app.exception_handler(TerminalTokenNotFound)
-async def terminal_not_found(req: starlette.requests.Request, exc: TerminalTokenNotFound):
+async def terminal_not_found_by_token(req: starlette.requests.Request, exc: TerminalTokenNotFound):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"Terminal not found by token").dict(),
         status_code=400,

@@ -48,8 +48,8 @@ class File(Model):
 
     @property
     def flatten_pages(self) -> list[int] | None:
-        '''Формирует и возвращает, учитывая интервалы, список, содержащий числа, из строки вида
-        "1-5, 3, 2"'''
+        '''Формирует и возвращает, учитывая интервалы, список из целых чисел из строки вида
+        "1-5, 3, 2" --> [1, 2, 3, 4, 5, 3, 2]'''
         if self.number_of_pages is None:
             return None
         result = list()
@@ -63,7 +63,8 @@ class File(Model):
     @property
     def sheets_count(self) -> int | None:
         '''Возвращает, учитывая интервалы, количество чисел, полученных из строки вида
-        "1-5, 3, 2"'''
+        "1-5, 3, 2" --> 7
+        P.S. 1, 2, 3, 4, 5, 3, 2 -- 7 чисел'''
         if self.number_of_pages is None:
             return None
         if not self.flatten_pages:

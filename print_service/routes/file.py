@@ -11,6 +11,7 @@ from fastapi_sqlalchemy import db
 from pydantic import Field, validator
 from sqlalchemy import func, or_
 
+from print_service.base import StatusResponseModel
 from print_service.exceptions import (
     AlreadyUploaded,
     FileIsNotReceived,
@@ -100,7 +101,7 @@ class ReceiveOutput(BaseModel):
 @router.post(
     '',
     responses={
-        403: {'detail': 'User error'},
+        403: {'model': StatusResponseModel, 'detail': 'User error'},
     },
     response_model=SendOutput,
 )
@@ -147,8 +148,8 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
 @router.post(
     '/{pin:str}',
     responses={
-        404: {'detail': 'Pin not found'},
-        415: {'detail': 'File error'},
+        404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
+        415: {'model': StatusResponseModel, 'detail': 'File error'},
     },
     response_model=SendOutput,
 )
@@ -216,7 +217,7 @@ async def upload_file(
 @router.patch(
     '/{pin:str}',
     responses={
-        404: {'detail': 'Pin not found'},
+        404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
     },
     response_model=SendOutput,
 )
@@ -261,8 +262,8 @@ async def update_file_options(
 @router.get(
     '/{pin:str}',
     responses={
-        404: {'detail': 'Pin not found'},
-        415: {'detail': 'File error'},
+        404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
+        415: {'model': StatusResponseModel, 'detail': 'File error'},
     },
     response_model=ReceiveOutput,
 )

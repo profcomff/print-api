@@ -9,6 +9,7 @@ from pydantic import constr
 from sqlalchemy import and_, func, or_
 
 from print_service import __version__
+from print_service.exceptions import UnionStudentDuplicate, UserNotFound
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import get_settings
@@ -62,7 +63,7 @@ async def check_union_member(
         return bool(user)
 
     if not user:
-        raise HTTPException(404, 'User not found')
+        raise UserNotFound()
     else:
         return {
             'surname': user.surname,
@@ -85,9 +86,7 @@ def update_list(
     if len(union_numbers) != len(set(union_numbers)) or len(student_numbers) != len(
         set(student_numbers)
     ):
-        raise HTTPException(
-            400, {"status": "error", "detail": "Duplicates by union_numbers or student_numbers"}
-        )
+        raise UnionStudentDuplicate()
 
     for user in input.users:
         db_user: UnionMember = (

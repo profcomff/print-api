@@ -1,4 +1,5 @@
 import io
+import math
 import random
 import re
 from datetime import date, datetime, timedelta
@@ -10,9 +11,16 @@ from PyPDF4 import PdfFileReader
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
+from print_service.exceptions import (
+    FileNotFound,
+    InvalidPageRequest,
+    IsNotUploaded,
+    UnprocessableFileInstance,
+)
 from print_service.models import File
 from print_service.models import File as FileModel
 from print_service.models import PrintFact
+from print_service.routes import exc_handlers
 from print_service.settings import Settings, get_settings
 
 
@@ -41,7 +49,7 @@ def generate_filename(original_filename: str):
     salt = ''.join(random.choice(settings.PIN_SYMBOLS) for _ in range(128))
     ext_list = re.findall(r'\w+', original_filename.split('.')[-1])
     if not ext_list:
-        raise HTTPException(422, "Unprocessable file instance")
+        raise UnprocessableFileInstance()
     ext = ext_list[0]
     return f'{datestr}-{salt}.{ext}'
 
@@ -55,13 +63,13 @@ def get_file(dbsession, pin: str or list[str]):
         .all()
     )
     if len(pin) != len(files):
-        raise HTTPException(404, f'{len(pin) - len(files)} file(s) not found')
+        raise FileNotFound(len(pin) - len(files))
 
     result = []
     for f in files:
         path = abspath(settings.STATIC_FOLDER) + '/' + f.file
         if not exists(path):
-            raise HTTPException(415, 'File has not uploaded yet')
+            raise IsNotUploaded()
 
         result.append(
             {
@@ -73,7 +81,11 @@ def get_file(dbsession, pin: str or list[str]):
                 },
             }
         )
-        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id)
+        _, number_of_pages = checking_for_pdf(f)
+        if f.flatten_pages:
+            if number_of_pages > max(f.flatten_pages):
+                raise InvalidPageRequest()
+        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count)
         dbsession.add(file_model)
         dbsession.commit()
     return result

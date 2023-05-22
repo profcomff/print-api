@@ -4,6 +4,7 @@ import pytest
 from fastapi import HTTPException
 from starlette import status
 
+from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded
 from print_service.models import File
 from print_service.settings import get_settings
 from print_service.utils import checking_for_pdf, get_file
@@ -56,13 +57,14 @@ def test_get_file_wrong_pin(uploaded_file_os, client):
 
 
 def test_get_file_func_1_not_exists(dbsession):
-    with pytest.raises(HTTPException):
+    with pytest.raises((FileNotFound, IsNotUploaded, InvalidPageRequest)):
         get_file(dbsession, ['1'])
+        assert FileNotFound
     dbsession.commit()
 
 
 def test_get_file_func_1_not_uploaded(dbsession, uploaded_file_db):
-    with pytest.raises(HTTPException):
+    with pytest.raises((FileNotFound, IsNotUploaded, InvalidPageRequest)):
         data = get_file(dbsession, [uploaded_file_db.pin])
     dbsession.commit()
 
@@ -82,7 +84,7 @@ def test_get_file_func_1_ok(dbsession, uploaded_file_os):
 
 
 def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
-    with pytest.raises(HTTPException):
+    with pytest.raises((FileNotFound, IsNotUploaded, InvalidPageRequest)):
         data = get_file(dbsession, [uploaded_file_os.pin, '1'])
 
 
@@ -164,3 +166,35 @@ def test_incorrect_filename(union_member_user, client, dbsession):
     assert res3.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     res4 = client.post(url, data=json.dumps(body4))
     assert res4.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_upload_big_file(pin_pdf, client):
+    fileName = 'tests/test_routes/test_files/many_pages.pdf'
+    files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
+    max_page = get_settings().MAX_PAGE_COUNT
+    get_settings().MAX_PAGE_COUNT = 9
+    res2 = client.post(f"{url}/{pin_pdf}", files=files)
+    assert res2.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    get_settings().MAX_PAGE_COUNT = 10
+    res3 = client.post(f"{url}/{pin_pdf}", files=files)
+    assert res3.status_code == status.HTTP_200_OK
+    get_settings().MAX_PAGE_COUNT = 3
+    payload = {"options": {"pages": "2-4,6", "copies": 1, "two_sided": False}}
+    res4 = client.patch(f"{url}/{pin_pdf}", json=payload)
+    assert res4.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    payload2 = {"options": {"pages": "1-3, 7", "copies": 2, "two_sided": False}}
+    get_settings().MAX_PAGE_COUNT = 7
+    res5 = client.patch(f"{url}/{pin_pdf}", json=payload2)
+    assert res5.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    payload3 = {"options": {"pages": "1-3, 7", "copies": 2, "two_sided": True}}
+    get_settings().MAX_PAGE_COUNT = 3
+    res6 = client.patch(f"{url}/{pin_pdf}", json=payload3)
+    assert res6.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    get_settings().MAX_PAGE_COUNT = 4
+    res7 = client.patch(f"{url}/{pin_pdf}", json=payload3)
+    assert res7.status_code == status.HTTP_200_OK
+    get_settings().MAX_PAGE_COUNT = 2
+    payload4 = {"options": {"pages": "1, 1, 1", "copies": 1, "two_sided": False}}
+    res8 = client.patch(f"{url}/{pin_pdf}", json=payload4)
+    assert res8.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    get_settings().MAX_PAGE_COUNT = max_page

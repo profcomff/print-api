@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer, String
@@ -45,6 +46,37 @@ class File(Model):
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')
 
+    @property
+    def flatten_pages(self) -> list[int] | None:
+        '''Возвращает расширенный список из элементов списков внутренних целочисленных точек переданного множества отрезков
+        "1-5, 3, 2" --> [1, 2, 3, 4, 5, 3, 2]'''
+        if self.number_of_pages is None:
+            return None
+        result = list()
+        if self.option_pages == '':
+            return result
+        for part in self.option_pages.split(','):
+            x = part.split('-')
+            result.extend(range(int(x[0]), int(x[-1]) + 1))
+        return result
+
+    @property
+    def sheets_count(self) -> int | None:
+        '''Возвращает количество элементов списков внутренних целочисленных точек переданного множества отрезков
+        "1-5, 3, 2" --> 7
+        P.S. 1, 2, 3, 4, 5, 3, 2 -- 7 чисел'''
+        if self.number_of_pages is None:
+            return None
+        if not self.flatten_pages:
+            return (
+                math.ceil(self.number_of_pages - (self.option_two_sided * self.number_of_pages / 2))
+                * self.option_copies
+            )
+        if self.option_two_sided:
+            return math.ceil(len(self.flatten_pages) / 2) * self.option_copies
+        else:
+            return len(self.flatten_pages) * self.option_copies
+
 
 class PrintFact(Model):
     __tablename__ = 'print_fact'
@@ -56,3 +88,5 @@ class PrintFact(Model):
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='print_facts')
     file: Mapped[File] = relationship('File', back_populates='print_facts')
+
+    sheets_used: Mapped[int] = Column(Integer)

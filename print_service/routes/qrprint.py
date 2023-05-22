@@ -9,6 +9,7 @@ from fastapi_sqlalchemy import db
 from pydantic import conlist
 from redis import Redis
 
+from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded, TerminalQRNotFound
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import get_file
@@ -92,7 +93,7 @@ async def instant_print(options: InstantPrintCreate):
     options.qr_token = options.qr_token.removeprefix(settings.QR_TOKEN_PREFIX)
     if redis_conn.send(**options.dict()):
         return {'status': 'ok'}
-    raise HTTPException(400, 'Terminal not found by qr')
+    raise TerminalQRNotFound()
 
 
 @router.websocket("")

@@ -5,8 +5,7 @@ settings = get_settings()
 
 
 class ObjectNotFound(Exception):
-    def __init__(self):
-        pass
+    pass
 
 
 class TerminalTokenNotFound(ObjectNotFound):

@@ -11,6 +11,7 @@ from fastapi_sqlalchemy import db
 from pydantic import Field, validator
 from sqlalchemy import func, or_
 
+from print_service.base import StatusResponseModel
 from print_service.exceptions import (
     AlreadyUploaded,
     FileIsNotReceived,
@@ -100,7 +101,8 @@ class ReceiveOutput(BaseModel):
 @router.post(
     '',
     responses={
-        403: {'detail': 'User error'},
+        403: {'model': StatusResponseModel, 'detail': 'User error'},
+        500: {'model': StatusResponseModel, 'detail': 'PIN generate error'},
     },
     response_model=SendOutput,
 )
@@ -124,7 +126,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     try:
         pin = generate_pin(db.session)
     except RuntimeError:
-        raise PINGenerateError
+        raise PINGenerateError()
     filename = generate_filename(inp.filename)
     file_model = FileModel(pin=pin, file=filename)
     file_model.owner = user
@@ -147,8 +149,11 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
 @router.post(
     '/{pin:str}',
     responses={
-        404: {'detail': 'Pin not found'},
-        415: {'detail': 'File error'},
+        400: {'model': StatusResponseModel, 'detail': 'File is not received'},
+        404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
+        415: {'model': StatusResponseModel, 'detail': 'File error'},
+        413: {'model': StatusResponseModel, 'detail': 'Too large file'},
+        416: {'model': StatusResponseModel, 'detail': 'Invalid page request'},
     },
     response_model=SendOutput,
 )
@@ -216,7 +221,9 @@ async def upload_file(
 @router.patch(
     '/{pin:str}',
     responses={
-        404: {'detail': 'Pin not found'},
+        404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
+        413: {'model': StatusResponseModel, 'detail': 'Too many pages'},
+        416: {'model': StatusResponseModel, 'detail': 'Invalid page request'},
     },
     response_model=SendOutput,
 )
@@ -261,8 +268,9 @@ async def update_file_options(
 @router.get(
     '/{pin:str}',
     responses={
-        404: {'detail': 'Pin not found'},
-        415: {'detail': 'File error'},
+        404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
+        415: {'model': StatusResponseModel, 'detail': 'File error'},
+        416: {'model': StatusResponseModel, 'detail': 'Invalid page request'},
     },
     response_model=ReceiveOutput,
 )

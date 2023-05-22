@@ -48,7 +48,7 @@ class File(Model):
 
     @property
     def flatten_pages(self) -> list[int] | None:
-        ''' Формирует и возвращает, учитывая интервалы, список, содержащий числа, из строки вида
+        '''Формирует и возвращает, учитывая интервалы, список, содержащий числа, из строки вида
         "1-5, 3, 2"'''
         if self.number_of_pages is None:
             return None

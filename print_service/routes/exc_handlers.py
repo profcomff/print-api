@@ -35,7 +35,7 @@ async def too_large_size(req: starlette.requests.Request, exc: TooLargeSize):
         content=StatusResponseModel(
             status="Error",
             message=f"{exc}",
-            ru=f'Размер файла превышает максимально допустимый: {settings.MAX_SIZE}',
+            ru=f"Размер файла превышает максимально допустимый: {settings.MAX_SIZE}",
         ).dict(),
         status_code=413,
     )
@@ -47,7 +47,7 @@ async def too_many_pages(req: starlette.requests.Request, exc: TooManyPages):
         content=StatusResponseModel(
             status="Error",
             message=f"{exc}",
-            ru=f'Количество запрошенных страниц превышает допустимое число: {settings.MAX_PAGE_COUNT}',
+            ru=f"Количество запрошенных страниц превышает допустимое число: {settings.MAX_PAGE_COUNT}",
         ).dict(),
         status_code=413,
     )
@@ -59,7 +59,7 @@ async def invalid_format(req: starlette.requests.Request, exc: TooManyPages):
         content=StatusResponseModel(
             status="Error",
             message=f"{exc}",
-            ru='Количество запрошенных страниц превышает их количество в файле',
+            ru="Количество запрошенных страниц превышает их количество в файле",
         ).dict(),
         status_code=416,
     )
@@ -69,7 +69,7 @@ async def invalid_format(req: starlette.requests.Request, exc: TooManyPages):
 async def terminal_not_found_by_qr(req: starlette.requests.Request, exc: TerminalQRNotFound):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"Terminal not found by QR", ru='QR-код не найден'
+            status="Error", message="Terminal not found by QR", ru="QR-код не найден"
         ).dict(),
         status_code=400,
     )
@@ -79,7 +79,7 @@ async def terminal_not_found_by_qr(req: starlette.requests.Request, exc: Termina
 async def terminal_not_found_by_token(req: starlette.requests.Request, exc: TerminalTokenNotFound):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"Terminal not found by token", ru='Токен не найден'
+            status="Error", message="Terminal not found by token", ru="Токен не найден"
         ).dict(),
         status_code=400,
     )
@@ -89,7 +89,7 @@ async def terminal_not_found_by_token(req: starlette.requests.Request, exc: Term
 async def user_not_found(req: starlette.requests.Request, exc: UserNotFound):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"User not found", ru='Пользователь не найден'
+            status="Error", message="User not found", ru="Пользователь не найден"
         ).dict(),
         status_code=404,
     )
@@ -101,7 +101,7 @@ async def student_duplicate(req: starlette.requests.Request, exc: UnionStudentDu
         content=StatusResponseModel(
             status="Error",
             message=f"{exc}",
-            ru='Один или более пользователей в списке не являются уникальными',
+            ru="Один или более пользователей в списке не являются уникальными",
         ).dict(),
         status_code=400,
     )
@@ -111,7 +111,9 @@ async def student_duplicate(req: starlette.requests.Request, exc: UnionStudentDu
 async def not_in_union(req: starlette.requests.Request, exc: NotInUnion):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"{exc}", ru='Отсутствует членство в профсоюзе'
+            status="Error",
+            message=f"{exc}",
+            ru="Отсутствует членство в профсоюзе",
         ).dict(),
         status_code=403,
     )
@@ -121,7 +123,9 @@ async def not_in_union(req: starlette.requests.Request, exc: NotInUnion):
 async def generate_error(req: starlette.requests.Request, exc: PINGenerateError):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"{exc}", ru='Ошибка генерации ПИН-кода'
+            status="Error",
+            message=f"{exc}",
+            ru="Ошибка генерации ПИН-кода",
         ).dict(),
         status_code=500,
     )
@@ -130,7 +134,7 @@ async def generate_error(req: starlette.requests.Request, exc: PINGenerateError)
 @app.exception_handler(FileIsNotReceived)
 async def file_not_received(req: starlette.requests.Request, exc: FileIsNotReceived):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}", ru='Файл не получен').dict(),
+        content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл не получен").dict(),
         status_code=400,
     )
 
@@ -139,7 +143,7 @@ async def file_not_received(req: starlette.requests.Request, exc: FileIsNotRecei
 async def pin_not_found(req: starlette.requests.Request, exc: PINNotFound):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"Pin {exc.pin} not found", ru='ПИН не найден'
+            status="Error", message=f"Pin {exc.pin} not found", ru="ПИН не найден"
         ).dict(),
         status_code=404,
     )
@@ -151,7 +155,7 @@ async def invalid_type(req: starlette.requests.Request, exc: InvalidType):
         content=StatusResponseModel(
             status="Error",
             message=f"{exc}",
-            ru=f'Неподдерживаемый формат файла. Допустимые: {settings.CONTENT_TYPES}',
+            ru=f"Неподдерживаемый формат файла. Допустимые: {', '.join(settings.CONTENT_TYPES)}",
         ).dict(),
         status_code=415,
     )
@@ -160,7 +164,7 @@ async def invalid_type(req: starlette.requests.Request, exc: InvalidType):
 @app.exception_handler(AlreadyUploaded)
 async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}", ru='Файл уже загружен').dict(),
+        content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл уже загружен").dict(),
         status_code=415,
     )
 
@@ -168,7 +172,7 @@ async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
 @app.exception_handler(IsCorrupted)
 async def is_corrupted(req: starlette.requests.Request, exc: IsCorrupted):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}", ru='Файл повреждён').dict(),
+        content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл повреждён").dict(),
         status_code=415,
     )
 
@@ -177,7 +181,7 @@ async def is_corrupted(req: starlette.requests.Request, exc: IsCorrupted):
 async def unprocessable_file_instance(req: starlette.requests.Request, exc: UnprocessableFileInstance):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"{exc}", ru='Необрабатываемый экземпляр файла'
+            status="Error", message=f"{exc}", ru="Необрабатываемый экземпляр файла"
         ).dict(),
         status_code=422,
     )
@@ -187,7 +191,7 @@ async def unprocessable_file_instance(req: starlette.requests.Request, exc: Unpr
 async def file_not_found(req: starlette.requests.Request, exc: FileNotFound):
     return JSONResponse(
         content=StatusResponseModel(
-            status="Error", message=f"{exc.count} file(s) not found", ru='Файл не найден'
+            status="Error", message=f"{exc.count} file(s) not found", ru="Файл не найден"
         ).dict(),
         status_code=404,
     )
@@ -196,6 +200,6 @@ async def file_not_found(req: starlette.requests.Request, exc: FileNotFound):
 @app.exception_handler(IsNotUploaded)
 async def not_uploaded(req: starlette.requests.Request, exc: IsNotUploaded):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}", ru='Файл не загружен').dict(),
+        content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл не загружен").dict(),
         status_code=415,
     )

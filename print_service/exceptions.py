@@ -9,13 +9,11 @@ class ObjectNotFound(Exception):
 
 
 class TerminalTokenNotFound(ObjectNotFound):
-    def __init__(self):
-        pass
+    pass
 
 
 class TerminalQRNotFound(ObjectNotFound):
-    def __init__(self):
-        pass
+    pass
 
 
 class PINNotFound(ObjectNotFound):
@@ -24,8 +22,7 @@ class PINNotFound(ObjectNotFound):
 
 
 class UserNotFound(ObjectNotFound):
-    def __init__(self):
-        pass
+    pass
 
 
 class FileNotFound(ObjectNotFound):

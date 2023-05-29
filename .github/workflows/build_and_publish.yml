@@ -109,6 +109,7 @@ jobs:
             --env STATIC_FOLDER=/app/static \
             --env STORAGE_TIME=30 \
             --env MAX_PAGE_COUNT='${{ vars.MAX_PAGE_COUNT }}' \
+            --env MAX_SIZE='${{ vars.MAX_SIZE }}' \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
           docker network connect com_profcomff_api_printer_test_network ${{ env.CONTAITER_NAME }}
@@ -175,6 +176,7 @@ jobs:
             --env STATIC_FOLDER=/app/static \
             --env STORAGE_TIME=168 \
             --env MAX_PAGE_COUNT='${{ vars.MAX_PAGE_COUNT }}' \
+            --env MAX_SIZE='${{ vars.MAX_SIZE }}' \
             --name ${{ env.CONTAITER_NAME }} \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker network connect com_profcomff_api_printer_network ${{ env.CONTAITER_NAME }}

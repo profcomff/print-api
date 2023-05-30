@@ -15,7 +15,7 @@ class Settings(UnionAuthSettings, BaseSettings):
     ROOT_PATH: str = '/' + os.getenv('APP_NAME', '')
 
     CONTENT_TYPES: List[str] = ['application/pdf']
-    MAX_SIZE: int = 5000000  # Максимальный размер файла в байтах
+    MAX_SIZE: int = 26214400  # Максимальный размер файла в байтах
     MAX_PAGE_COUNT: int = 50
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
     STATIC_FOLDER: DirectoryPath | None

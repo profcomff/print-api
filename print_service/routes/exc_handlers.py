@@ -164,7 +164,9 @@ async def invalid_type(req: starlette.requests.Request, exc: InvalidType):
 @app.exception_handler(AlreadyUploaded)
 async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл уже загружен").model_dump(),
+        content=StatusResponseModel(
+            status="Error", message=f"{exc}", ru="Файл уже загружен"
+        ).model_dump(),
         status_code=415,
     )
 
@@ -200,6 +202,8 @@ async def file_not_found(req: starlette.requests.Request, exc: FileNotFound):
 @app.exception_handler(IsNotUploaded)
 async def not_uploaded(req: starlette.requests.Request, exc: IsNotUploaded):
     return JSONResponse(
-        content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл не загружен").model_dump(),
+        content=StatusResponseModel(
+            status="Error", message=f"{exc}", ru="Файл не загружен"
+        ).model_dump(),
         status_code=415,
     )

@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import List
 
 from auth_lib.fastapi import UnionAuthSettings
-from pydantic import AnyUrl, DirectoryPath, PostgresDsn, RedisDsn, ConfigDict
+from pydantic import AnyUrl, ConfigDict, DirectoryPath, PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings
 
 

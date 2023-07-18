@@ -5,7 +5,7 @@ from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi_sqlalchemy import db
-from pydantic import constr
+from pydantic import constr, validate_call
 from sqlalchemy import and_, func, or_
 
 from print_service import __version__
@@ -35,6 +35,9 @@ class UpdateUserList(BaseModel):
 
 
 # region handlers
+
+
+@validate_call
 @router.get(
     '/is_union_member',
     status_code=202,
@@ -48,9 +51,10 @@ async def check_union_member(
     v: Optional[str] = __version__,
 ):
     """Проверяет наличие пользователя в списке."""
+    surname = surname.upper()
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
-        user = user.filter(UnionMember.union_number is not None)
+        user = user.filter(UnionMember.union_number != None)
     user: UnionMember = user.filter(
         or_(
             func.upper(UnionMember.student_number) == number,

@@ -3,18 +3,18 @@ import logging
 import random
 from asyncio import sleep
 from datetime import datetime, timedelta
+from typing import Set
 
 from fastapi import APIRouter, Header, HTTPException, WebSocket
 from fastapi_sqlalchemy import db
 from pydantic import Field
 from redis import Redis
+from typing_extensions import Annotated
 
 from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded, TerminalQRNotFound
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import get_file
-from typing import Set
-from typing_extensions import Annotated
 
 
 logger = logging.getLogger(__name__)

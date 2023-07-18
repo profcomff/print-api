@@ -6,13 +6,15 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Header, HTTPException, WebSocket
 from fastapi_sqlalchemy import db
-from pydantic import conlist
+from pydantic import Field
 from redis import Redis
 
 from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded, TerminalQRNotFound
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import get_file
+from typing import Set
+from typing_extensions import Annotated
 
 
 logger = logging.getLogger(__name__)
@@ -22,13 +24,13 @@ router = APIRouter()
 
 class InstantPrintCreate(BaseModel):
     qr_token: str
-    files: conlist(str, min_items=1, max_items=10, unique_items=True)
+    files: Annotated[Set[str], Field(min_length=1, max_length=10)]
 
 
 class InstantPrintSender:
     def __init__(self, settings: Settings = None) -> None:
         settings = settings or get_settings()
-        self.redis: Redis = Redis.from_url(settings.REDIS_DSN)
+        self.redis: Redis = Redis.from_url(str(settings.REDIS_DSN))
 
     def send(self, qr_token: str, files: list[str]):
         terminal = self.redis.get(qr_token)
@@ -47,7 +49,7 @@ class InstantPrintFetcher:
     def __init__(self, terminal_token: str, settings: Settings = None) -> None:
         self.terminal_token = terminal_token
         settings = settings or get_settings()
-        self.redis = Redis.from_url(settings.REDIS_DSN)
+        self.redis = Redis.from_url(str(settings.REDIS_DSN))
         self.ttl = settings.QR_TOKEN_TTL
         self.delay = settings.QR_TOKEN_DELAY
         self.symbols = settings.QR_TOKEN_SYMBOLS
@@ -90,7 +92,7 @@ redis_conn = InstantPrintSender()
 
 @router.post("")
 async def instant_print(options: InstantPrintCreate):
-    options.qr_token = options.qr_token.removeprefix(settings.QR_TOKEN_PREFIX)
+    options.qr_token = options.qr_token.removeprefix(str(settings.QR_TOKEN_PREFIX))
     if redis_conn.send(**options.dict()):
         return {'status': 'ok'}
     raise TerminalQRNotFound()
@@ -103,7 +105,7 @@ async def instant_print_terminal_connection(
 ):
     await websocket.accept()
     manager = InstantPrintFetcher(authorization.removeprefix("token "))
-    await websocket.send_text(json.dumps({"qr_token": settings.QR_TOKEN_PREFIX + manager.new_qr()}))
+    await websocket.send_text(json.dumps({"qr_token": str(settings.QR_TOKEN_PREFIX) + manager.new_qr()}))
     async for task in manager:
-        task['qr_token'] = settings.QR_TOKEN_PREFIX + task['qr_token']
+        task['qr_token'] = str(settings.QR_TOKEN_PREFIX) + task['qr_token']
         await websocket.send_text(json.dumps(task))

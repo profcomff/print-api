@@ -26,7 +26,7 @@ class RebootInput(BaseModel):
 class InstantCommandSender:
     def __init__(self, settings: Settings = None) -> None:
         settings = settings or get_settings()
-        self.redis: Redis = Redis.from_url(settings.REDIS_DSN)
+        self.redis: Redis = Redis.from_url(str(settings.REDIS_DSN))
 
     def update(self, terminal_token: str):
         terminal = self.redis.get(terminal_token)

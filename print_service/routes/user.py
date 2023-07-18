@@ -50,7 +50,7 @@ async def check_union_member(
     """Проверяет наличие пользователя в списке."""
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
-        user = user.filter(UnionMember.union_number != None)
+        user = user.filter(UnionMember.union_number is not None)
     user: UnionMember = user.filter(
         or_(
             func.upper(UnionMember.student_number) == number,

@@ -27,7 +27,7 @@ app = FastAPI(
     docs_url=None if __version__ != 'dev' else '/docs',
     redoc_url=None,
 )
-app.add_middleware(DBSessionMiddleware, db_url=settings.DB_DSN, engine_args=dict(pool_pre_ping=True))
+app.add_middleware(DBSessionMiddleware, db_url=str(settings.DB_DSN), engine_args=dict(pool_pre_ping=True))
 
 app.add_middleware(
     CORSMiddleware,

@@ -37,7 +37,6 @@ class UpdateUserList(BaseModel):
 # region handlers
 
 
-@validate_call
 @router.get(
     '/is_union_member',
     status_code=202,

@@ -8,7 +8,7 @@ from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from sqlalchemy import func, or_
 
 from print_service.base import StatusResponseModel
@@ -43,7 +43,7 @@ class PrintOptions(BaseModel):
     copies: int = Field(1, description='Количество копий для печати')
     two_sided: bool = Field(False, description='Включить печать с двух сторон листа')
 
-    @validator('pages', pre=True, always=True)
+    @field_validator('pages', mode='before')
     def validate_pages(cls, value: str):
         if not isinstance(value, str):
             raise ValueError('Value must be str')
@@ -75,7 +75,7 @@ class SendInput(BaseModel):
 
 
 class SendInputUpdate(BaseModel):
-    options: PrintOptions | None
+    options: PrintOptions | None = None
 
 
 class SendOutput(BaseModel):
@@ -234,7 +234,7 @@ async def update_file_options(
 
     Требует пин-код, полученный в методе POST `/file`. Обновлять настройки
     можно бесконечное количество раз. Можно изменять настройки по одной."""
-    options = inp.options.dict(exclude_unset=True)
+    options = inp.options.model_dump(exclude_unset=True)
     file_model = (
         db.session.query(FileModel)
         .filter(func.upper(FileModel.pin) == pin.upper())

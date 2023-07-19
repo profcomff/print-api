@@ -25,6 +25,6 @@ def client(mocker):
 @pytest.fixture
 def dbsession() -> Session:
     settings = Settings()
-    engine = create_engine(settings.DB_DSN, pool_pre_ping=True)
+    engine = create_engine(str(settings.DB_DSN), pool_pre_ping=True)
     TestingSessionLocal = sessionmaker(bind=engine)
     yield TestingSessionLocal()

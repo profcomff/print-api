@@ -4,7 +4,8 @@ from functools import lru_cache
 from typing import List
 
 from auth_lib.fastapi import UnionAuthSettings
-from pydantic import AnyUrl, BaseSettings, DirectoryPath, PostgresDsn, RedisDsn
+from pydantic import AnyUrl, ConfigDict, DirectoryPath, PostgresDsn, RedisDsn
+from pydantic_settings import BaseSettings
 
 
 class Settings(UnionAuthSettings, BaseSettings):
@@ -18,7 +19,7 @@ class Settings(UnionAuthSettings, BaseSettings):
     MAX_SIZE: int = 26214400  # Максимальный размер файла в байтах
     MAX_PAGE_COUNT: int = 50
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
-    STATIC_FOLDER: DirectoryPath | None
+    STATIC_FOLDER: DirectoryPath | None = None
 
     ALLOW_STUDENT_NUMBER: bool = False
 
@@ -36,8 +37,7 @@ class Settings(UnionAuthSettings, BaseSettings):
     QR_TOKEN_TTL: int = 30  # Show time of QR code in seconds
     QR_TOKEN_DELAY: int = 5  # How long QR code valid after hide in seconds
 
-    class Config:
-        env_file = '.env'
+    model_config = ConfigDict(env_file=".env", extra="allow")
 
 
 @lru_cache()

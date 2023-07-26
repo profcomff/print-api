@@ -42,6 +42,7 @@ class File(Model):
         DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     number_of_pages: Mapped[int] = Column(Integer)
+    source: Mapped[str] = Column(String)
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')
@@ -88,5 +89,4 @@ class PrintFact(Model):
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='print_facts')
     file: Mapped[File] = relationship('File', back_populates='print_facts')
-
     sheets_used: Mapped[int] = Column(Integer)

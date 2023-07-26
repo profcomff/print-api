@@ -21,8 +21,6 @@ def upgrade():
     op.add_column('file', sa.Column('option_copies', sa.Integer(), nullable=True))
     op.add_column('file', sa.Column('option_two_sided', sa.Boolean(), nullable=True))
     op.add_column('file', sa.Column('source', sa.String(), nullable=True))
-    op.execute(f'UPDATE "file" SET source = unknown')
-    op.alter_column('file', 'source', nullable=False)
 
 
 def downgrade():

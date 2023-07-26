@@ -24,6 +24,7 @@ def upgrade():
     op.execute(f'UPDATE "file" SET source = "unknown"')
     op.alter_column('file', 'source', nullable=False)
 
+
 def downgrade():
     op.drop_column('file', 'option_two_sided')
     op.drop_column('file', 'option_copies')

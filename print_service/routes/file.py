@@ -71,6 +71,7 @@ class SendInput(BaseModel):
         description='Название файла',
         example='filename.pdf',
     )
+    source: str | None = None
     options: PrintOptions = PrintOptions()
 
 
@@ -128,7 +129,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     except RuntimeError:
         raise PINGenerateError()
     filename = generate_filename(inp.filename)
-    file_model = FileModel(pin=pin, file=filename)
+    file_model = FileModel(pin=pin, file=filename, source=inp.source)
     file_model.owner = user
     file_model.option_copies = inp.options.copies
     file_model.option_pages = inp.options.pages

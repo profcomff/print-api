@@ -42,7 +42,7 @@ class File(Model):
         DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     number_of_pages: Mapped[int] = Column(Integer)
-    source: Mapped[str] = Column(String)
+    source: Mapped[str] = Column(String, default='unknown', nullable=True)
 
     owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')

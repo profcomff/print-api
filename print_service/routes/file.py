@@ -71,7 +71,7 @@ class SendInput(BaseModel):
         description='Название файла',
         example='filename.pdf',
     )
-    source: str
+    source: str | None = None
     options: PrintOptions = PrintOptions()
 
 

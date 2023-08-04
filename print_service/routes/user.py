@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, or_
 
 from print_service import __version__
 from print_service.exceptions import UnionStudentDuplicate, UserNotFound
-from print_service.models import UnionMember
+from print_service.models import File, PrintFact, UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import get_settings
 
@@ -90,7 +90,7 @@ def update_list(
         set(student_numbers)
     ):
         raise UnionStudentDuplicate()
-
+    users_id = []
     for user in input.users:
         db_user: UnionMember = (
             db.session.query(UnionMember)
@@ -108,7 +108,6 @@ def update_list(
             )
             .one_or_none()
         )
-
         if db_user:
             db_user.surname = user.username
             db_user.union_number = user.union_number
@@ -122,7 +121,23 @@ def update_list(
                 )
             )
         db.session.flush()
-
+        user_not_to_delete: UnionMember = db.session.query(UnionMember).filter(UnionMember.surname == user.username, UnionMember.union_number == user.union_number, UnionMember.student_number == user.student_number).one()
+        users_id.append(user_not_to_delete.id)
+    db_delete_print_facts: list[PrintFact] = (
+        db.session.query(PrintFact).filter(PrintFact.owner_id.notin_(users_id)).all()
+    )
+    db_delete_files: list[File] = db.session.query(File).filter(File.owner_id.notin_(users_id)).all()
+    db_delete_users: list[UnionMember] = (
+        db.session.query(UnionMember).filter(UnionMember.id.notin_(users_id)).all()
+    )
+    for print_fact in db_delete_print_facts:
+        db.session.delete(print_fact)
+    db.session.flush()
+    for file in db_delete_files:
+        db.session.delete(file)
+    db.session.flush()
+    for _user in db_delete_users:
+        db.session.delete(_user)
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
 

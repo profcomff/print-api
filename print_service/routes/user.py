@@ -122,20 +122,14 @@ def update_list(
             )
         db.session.flush()
         users_id.append(db_user.id)
-    db_delete_print_facts: list[PrintFact] = (
-        db.session.query(PrintFact).filter(PrintFact.owner_id.notin_(users_id)).all()
-    )
-    db_delete_files: list[File] = db.session.query(File).filter(File.owner_id.notin_(users_id)).all()
     db_delete_users: list[UnionMember] = (
         db.session.query(UnionMember).filter(UnionMember.id.notin_(users_id)).all()
     )
-    for print_fact in db_delete_print_facts:
-        db.session.delete(print_fact)
-    db.session.flush()
-    for file in db_delete_files:
-        db.session.delete(file)
-    db.session.flush()
     for _user in db_delete_users:
+        for print_fact in _user.print_facts:
+            db.session.delete(print_fact)
+        for files in _user.files:
+            db.session.delete(files)
         db.session.delete(_user)
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}

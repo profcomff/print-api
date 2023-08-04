@@ -114,23 +114,14 @@ def update_list(
             db_user.student_number = user.student_number
         else:
             db.session.add(
-                UnionMember(
+                db_user := UnionMember(
                     surname=user.username,
                     union_number=user.union_number,
                     student_number=user.student_number,
                 )
             )
         db.session.flush()
-        user_not_to_delete: UnionMember = (
-            db.session.query(UnionMember)
-            .filter(
-                UnionMember.surname == user.username,
-                UnionMember.union_number == user.union_number,
-                UnionMember.student_number == user.student_number,
-            )
-            .one()
-        )
-        users_id.append(user_not_to_delete.id)
+        users_id.append(db_user.id)
     db_delete_print_facts: list[PrintFact] = (
         db.session.query(PrintFact).filter(PrintFact.owner_id.notin_(users_id)).all()
     )

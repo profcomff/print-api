@@ -128,7 +128,7 @@ def test_post_delete(client):
                 'username': 'artem',
                 'union_number': '1777',
                 'student_number': '1776',
-            }
+            },
         ],
     }
     res_post = client.post(url, json=body)

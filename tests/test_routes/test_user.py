@@ -88,3 +88,27 @@ def test_post_list_duplicates(users, client):
     body = {'users': users}
     res = client.post(url, json=body)
     assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()
+
+
+def test_post_delete(client):
+    body = {
+        'users': [
+            {
+                'username': 'paul',
+                'union_number': '1966',
+                'student_number': '1967',
+            }
+        ],
+    }
+    params = {
+        'surname': 'paul',
+        'number': '1966',
+    }
+    res_post = client.post(url, json=body)
+    assert res_post.status_code == status.HTTP_200_OK
+    res_get1 = client.get(url, params=params)
+    assert res_get1.status_code == status.HTTP_202_ACCEPTED
+    res_post_delete = client.post(url, json={'users': []})
+    assert res_post_delete.status_code == status.HTTP_200_OK
+    res_get2 = client.get(url, params=params)
+    assert res_get2.status_code == status.HTTP_404_NOT_FOUND

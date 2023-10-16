@@ -179,7 +179,7 @@ async def upload_file(
         await file.close()
         raise PINNotFound(pin)
     if file.content_type not in settings.CONTENT_TYPES:
-        raise InvalidType()
+        raise InvalidType(file.content_type)
     path = abspath(settings.STATIC_FOLDER) + '/' + file_model.file
     if exists(path):
         await file.close()

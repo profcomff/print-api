@@ -24,7 +24,7 @@ settings = get_settings()
 class UserCreate(BaseModel):
     username: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
-    student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
+    student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)] \
     is_deleted: bool
 
 

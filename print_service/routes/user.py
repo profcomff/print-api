@@ -25,6 +25,7 @@ class UserCreate(BaseModel):
     username: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
     student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
+    is_deleted: bool
 
 
 class UpdateUserList(BaseModel):
@@ -113,12 +114,14 @@ def update_list(
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
+            db_user.is_deleted = user.is_deleted
         else:
             db.session.add(
                 UnionMember(
                     surname=user.username,
                     union_number=user.union_number,
                     student_number=user.student_number,
+                    is_deleted = False,
                 )
             )
         db.session.flush()

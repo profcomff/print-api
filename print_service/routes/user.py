@@ -121,7 +121,7 @@ def update_list(
                     surname=user.username,
                     union_number=user.union_number,
                     student_number=user.student_number,
-                    is_deleted = False,
+                    is_deleted=False,
                 )
             )
         db.session.flush()

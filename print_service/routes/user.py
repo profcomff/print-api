@@ -81,6 +81,9 @@ def update_list(
     input: UpdateUserList,
     user=Depends(UnionAuth(scopes=["print.user.create", "print.user.update", "print.user.delete"])),
 ):
+    """Обновить базу данных членов профкома.
+
+    Требует новый список членов профкома. Возвращает длину нового списка."""
     logger.info(f"User {user} updated list")
 
     union_numbers = [user.union_number for user in input.users if user.union_number is not None]

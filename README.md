@@ -40,7 +40,7 @@
 
 5. Запускайте приложение!
     ```console
-    (venv) foo@bar:~$ python -m calendar_backend
+    (venv) foo@bar:~$ python -m print_service
     ```
 
 

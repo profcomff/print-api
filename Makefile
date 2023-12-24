@@ -1,5 +1,5 @@
 run:
-	source ./venv/bin/activate && uvicorn --reload --log-level debug print_service.routes:app
+	source ./venv/bin/activate && uvicorn --reload --log-config logging_dev.conf print_service.routes:app
 
 configure: venv
 	source ./venv/bin/activate && pip install -r requirements.dev.txt -r requirements.txt

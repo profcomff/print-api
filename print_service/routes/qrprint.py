@@ -5,13 +5,15 @@ from asyncio import sleep
 from datetime import datetime, timedelta
 from typing import Set
 
-from fastapi import APIRouter, Header, HTTPException, WebSocket
+from auth_lib.aiomethods import AsyncAuthLib
+from fastapi import APIRouter, Header, WebSocket, WebSocketException
 from fastapi_sqlalchemy import db
 from pydantic import Field
 from redis import Redis
+from starlette.status import WS_1000_NORMAL_CLOSURE
 from typing_extensions import Annotated
 
-from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded, TerminalQRNotFound
+from print_service.exceptions import TerminalQRNotFound
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import get_file
@@ -20,6 +22,7 @@ from print_service.utils import get_file
 logger = logging.getLogger(__name__)
 settings: Settings = get_settings()
 router = APIRouter()
+auth = AsyncAuthLib(auth_url=settings.AUTH_URL, userdata_url=settings.USERDATA_URL)
 
 
 class InstantPrintCreate(BaseModel):
@@ -49,13 +52,14 @@ class InstantPrintFetcher:
     def __init__(self, terminal_token: str, settings: Settings = None) -> None:
         self.terminal_token = terminal_token
         settings = settings or get_settings()
-        self.redis = Redis.from_url(str(settings.REDIS_DSN))
+        self.redis: Redis = Redis.from_url(str(settings.REDIS_DSN))
         self.ttl = settings.QR_TOKEN_TTL
         self.delay = settings.QR_TOKEN_DELAY
         self.symbols = settings.QR_TOKEN_SYMBOLS
         self.length = settings.QR_TOKEN_LENGTH
 
     def new_qr(self):
+        logger.debug("Generating new QR token")
         for _ in range(5):
             qr_token = ''.join(random.choice(self.symbols) for _ in range(self.length))
             if not self.redis.get(qr_token):  # If this qr already exists, generate new
@@ -77,6 +81,31 @@ class InstantPrintFetcher:
             return {}
         return json.loads(raw_value)
 
+    async def check_token(self):
+        """Check if token valid and not used"""
+        logger.info("Checking token")
+
+        # Token should be valid
+        me = await auth.check_token(self.terminal_token)
+        if me is None:
+            logger.error("Not authenticated")
+            raise Exception("Not authenticated")
+
+        for scope in me['session_scopes']:
+            if scope['name'] == "print.qr_task.get":
+                break
+        else:
+            logger.error("Unauthorized")
+            logger.debug(me)
+            raise Exception("Unauthorized")
+
+        # Token shouldn't be used yet
+        for key in self.redis.keys():
+            value = self.redis.get(key)
+            if self.redis.get(key) == self.terminal_token.encode():
+                logger.error("Token already used")
+                raise Exception("Token already used")
+
     def __aiter__(self):
         return self
 
@@ -93,7 +122,7 @@ redis_conn = InstantPrintSender()
 @router.post("")
 async def instant_print(options: InstantPrintCreate):
     options.qr_token = options.qr_token.removeprefix(str(settings.QR_TOKEN_PREFIX))
-    if redis_conn.send(**options.dict()):
+    if redis_conn.send(**options.model_dump()):
         return {'status': 'ok'}
     raise TerminalQRNotFound()
 
@@ -104,7 +133,15 @@ async def instant_print_terminal_connection(
     authorization: str = Header(),
 ):
     await websocket.accept()
+    logger.debug("Websocket connection started")
     manager = InstantPrintFetcher(authorization.removeprefix("token "))
+    try:
+        await manager.check_token()
+    except Exception as e:
+        await websocket.send_text(json.dumps({"error": e.args[0]}))
+        raise WebSocketException(WS_1000_NORMAL_CLOSURE, "Auth error")
+    logger.debug("Websocket token checked")
+
     await websocket.send_text(json.dumps({"qr_token": str(settings.QR_TOKEN_PREFIX) + manager.new_qr()}))
     async for task in manager:
         task['qr_token'] = str(settings.QR_TOKEN_PREFIX) + task['qr_token']

@@ -5,14 +5,13 @@ from asyncio import sleep
 from datetime import datetime, timedelta
 from typing import Set
 
-from fastapi import APIRouter, Header, WebSocketException, HTTPException, WebSocket
+from auth_lib.aiomethods import AsyncAuthLib
+from fastapi import APIRouter, Header, WebSocket, WebSocketException
 from fastapi_sqlalchemy import db
 from pydantic import Field
 from redis import Redis
-from typing_extensions import Annotated
 from starlette.status import WS_1000_NORMAL_CLOSURE
-
-from auth_lib.aiomethods import AsyncAuthLib
+from typing_extensions import Annotated
 
 from print_service.exceptions import TerminalQRNotFound
 from print_service.schema import BaseModel

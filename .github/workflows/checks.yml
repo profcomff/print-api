@@ -8,6 +8,28 @@ jobs:
   test:
     name: Unit tests
     runs-on: ubuntu-latest
+    env:
+      DB_DSN: postgresql://postgres@postgres:5432/postgres
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,18 +43,12 @@ jobs:
           python -m ensurepip
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements.dev.txt
-      - name: Run postgres
-        run: |
-          make db
       - name: Migrate DB
         run: |
           make migrate
-      - name: Run redis
-        run: |
-          make redis
       - name: Build coverage file
         run: |
-          DB_DSN=postgresql://postgres@localhost:5432/postgres pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=print_service tests/ | tee pytest-coverage.txt
+          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=print_service tests/ | tee pytest-coverage.txt
       - name: Print report
         if: always()
         run: |

@@ -9,11 +9,14 @@ jobs:
     name: Unit tests
     runs-on: ubuntu-latest
     env:
-      DB_DSN: postgresql://postgres@postgres:5432/postgres
+      DB_DSN: postgresql://postgres@localhost:5432/postgres
+      REDIS_DSN: redis://localhost:6379/0
     
     services:
       postgres:
         image: postgres:15
+        ports:
+          - 5432:5432
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
         options: >-
@@ -24,6 +27,8 @@ jobs:
 
       redis:
         image: redis
+        ports:
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s

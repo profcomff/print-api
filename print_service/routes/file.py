@@ -27,6 +27,7 @@ class PrintOptions(BaseModel):
     pages: str = Field('', description='Страницы для печати', example='2-4,6')
     copies: int = Field(1, description='Количество копий для печати')
     two_sided: bool = Field(False, description='Включить печать с двух сторон листа')
+    format: str = Field('A4', description='Формат печати')
 
     @validator('pages', pre=True, always=True)
     def validate_pages(cls, value: str):
@@ -40,6 +41,14 @@ class PrintOptions(BaseModel):
             raise ValueError('Pages must be formated as 2-5,7')
         if value_arr[0] == '0' or value_arr[0] == '':
             raise ValueError('Can not print negative and zero pages')
+        return value
+
+    @validator('format')
+    def format_validator(cls, value: str):
+        value = value.lower()
+        value = value.replace('а', 'a')
+        if value not in ['a3', 'a4', 'a5']:
+            raise ValueError('Invalid format')
         return value
 
 

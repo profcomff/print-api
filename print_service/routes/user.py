@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, or_
 
 from print_service import __version__
 from print_service.exceptions import UnionStudentDuplicate, UserNotFound
-from print_service.models import UnionMember
+from print_service.models import File, PrintFact, UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import get_settings
 
@@ -91,7 +91,7 @@ def update_list(
         set(student_numbers)
     ):
         raise UnionStudentDuplicate()
-
+    users_id = []
     for user in input.users:
         db_user: UnionMember = (
             db.session.query(UnionMember)
@@ -109,21 +109,29 @@ def update_list(
             )
             .one_or_none()
         )
-
         if db_user:
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
         else:
             db.session.add(
-                UnionMember(
+                db_user := UnionMember(
                     surname=user.username,
                     union_number=user.union_number,
                     student_number=user.student_number,
                 )
             )
         db.session.flush()
-
+        users_id.append(db_user.id)
+    db_delete_users: list[UnionMember] = (
+        db.session.query(UnionMember).filter(UnionMember.id.notin_(users_id)).all()
+    )
+    for _user in db_delete_users:
+        for print_fact in _user.print_facts:
+            db.session.delete(print_fact)
+        for files in _user.files:
+            db.session.delete(files)
+        db.session.delete(_user)
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
 

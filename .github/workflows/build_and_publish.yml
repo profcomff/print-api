@@ -102,7 +102,7 @@ jobs:
             --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
-            --env PIN_LENGTH=8 \
+            --env PIN_LENGTH=6 \
             --env QR_TOKEN_PREFIX='https://printer.ui.test.profcomff.com#' \
             --env GUNICORN_CMD_ARGS='--log-config  logging_test.conf' \
             --env ALLOW_STUDENT_NUMBER=true \
@@ -169,7 +169,7 @@ jobs:
             --env REDIS_DSN='redis://${{ env.CONTAITER_NAME }}_redis' \
             --env SECRET_KEY='${{ secrets.SECRET_KEY }}' \
             --env PIN_SYMBOLS=0123456789 \
-            --env PIN_LENGTH=8 \
+            --env PIN_LENGTH=6 \
             --env QR_TOKEN_PREFIX='https://app.profcomff.com/apps#' \
             --env GUNICORN_CMD_ARGS='--log-config  logging_prod.conf' \
             --env ALLOW_STUDENT_NUMBER=true \

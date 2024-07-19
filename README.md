@@ -1,6 +1,8 @@
 # Сервис печати
 Серверная часть сервиса для работы с документами, отправляемыми на печать
 
+[<img src="https://cdn.profcomff.com/easycode/easycode.svg" width="200"></img>](https://easycode.profcomff.com/templates/docker-fastapi/workspace?mode=manual&param.Repository+URL=https://github.com/profcomff/print-api.git&param.Working+directory=print-api)
+
 ## Функционал 
 1. Управление файлами, отправляемыми пользователями на печать
     - Создание/удаление файлов

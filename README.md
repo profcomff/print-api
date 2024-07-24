@@ -153,4 +153,4 @@
 
 - Основная [информация](https://docs.profcomff.com/tvoy-ff/backend/index.html) по разработке наших приложений
 
-- [Ссылка](https://github.com/profcomff/print-api/blob/main/CONTRIBUTING.md) на страницу с информацией по разработке userdata-api
+- [Ссылка](https://github.com/profcomff/print-api/blob/main/CONTRIBUTING.md) на страницу с информацией по разработке print-api

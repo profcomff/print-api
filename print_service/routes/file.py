@@ -160,7 +160,10 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     response_model=SendOutput,
 )
 async def upload_file(
-    pin: str, file: UploadFile = File(...), settings: Settings = Depends(get_settings)
+    pin: str,
+    file: UploadFile = File(...),
+    settings: Settings = Depends(get_settings),
+    _=Depends(UnionAuth(scopes=["print.file.create"], allow_none=False, auto_error=True)),
 ):
     """Загрузить файл на сервер.
 
@@ -230,7 +233,10 @@ async def upload_file(
     response_model=SendOutput,
 )
 async def update_file_options(
-    pin: str, inp: SendInputUpdate, settings: Settings = Depends(get_settings)
+    pin: str,
+    inp: SendInputUpdate,
+    settings: Settings = Depends(get_settings),
+    _=Depends(UnionAuth(scopes=["print.file.update"], allow_none=False, auto_error=True)),
 ):
     """Обновляет настройки печати.
 

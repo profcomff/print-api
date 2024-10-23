@@ -21,6 +21,7 @@ from print_service.exceptions import (
     UnionStudentDuplicate,
     UnprocessableFileInstance,
     UserNotFound,
+    UserIsDeleted,
 )
 from print_service.routes.base import app
 from print_service.settings import get_settings
@@ -72,6 +73,16 @@ async def terminal_not_found_by_qr(req: starlette.requests.Request, exc: Termina
             status="Error", message="Terminal not found by QR", ru="QR-код не найден"
         ).model_dump(),
         status_code=400,
+    )
+
+
+@app.exception_handler(UserIsDeleted)
+async def user_is_deleted(req: starlette.requests.Request, exc: TerminalTokenNotFound):
+    return JSONResponse(
+        content=StatusResponseModel(
+            status="Error", message="User is deleted", ru="Пользователь удалён из базы"
+        ).model_dump(),
+        status_code=410
     )
 
 

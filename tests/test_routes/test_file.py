@@ -44,6 +44,18 @@ def test_post_success(union_member_user, client, dbsession):
     dbsession.commit()
 
 
+def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
+    body = {
+        "surname": union_member_user['surname'],
+        "number": union_member_user['union_number'],
+        "filename": "filename.pdf",
+        "source": "webapp",
+        "options": {"pages": "", "copies": 1, "two_sided": False},
+    }
+    res = client.post(url, data=json.dumps(body))
+    assert res.status_code == status.HTTP_410_GONE
+
+
 def test_post_unauthorized_user(client):
     body = {
         "surname": 'surname',
@@ -106,6 +118,27 @@ def test_get_file_func_2_not_exists(dbsession, uploaded_file_os):
 def test_file_check():
     assert checking_for_pdf(open("tests/test_routes/test_files/broken.pdf", "rb").read()) == (False, 0)
     assert checking_for_pdf(open("tests/test_routes/test_files/correct.pdf", "rb").read()) == (True, 2)
+
+
+def test_upload_is_deleted(pin_pdf, client, add_is_deleted_flag):
+    pin = pin_pdf
+    fileName = 'tests/test_routes/test_files/correct.pdf'
+    files = {'file': (f"{fileName}", open(f"{fileName}", 'rb'), "application/pdf")}
+    res = client.post(f"{url}/{pin}", files=files)
+    assert res.status_code == status.HTTP_410_GONE
+
+
+def test_patch_is_deleted(pin_pdf, client, add_is_deleted_flag):
+    pin = pin_pdf
+    body = {
+        "options": {
+            "pages": "",
+            "copies": 2,
+            "two_sided": False
+        }
+    }
+    res = client.patch(f"{url}/{pin}", json=body)
+    assert res.status_code == status.HTTP_410_GONE
 
 
 def test_upload_and_print_correct_pdf(pin_pdf, client):

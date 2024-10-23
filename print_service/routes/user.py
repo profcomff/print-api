@@ -9,7 +9,7 @@ from pydantic import constr, validate_call
 from sqlalchemy import and_, func, or_
 
 from print_service import __version__
-from print_service.exceptions import UnionStudentDuplicate, UserNotFound
+from print_service.exceptions import UnionStudentDuplicate, UserNotFound, UserIsDeleted
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import get_settings
@@ -42,6 +42,7 @@ class UpdateUserList(BaseModel):
     status_code=202,
     responses={
         404: {'detail': 'User not found'},
+        410: {'detail': 'User is deleted'}
     },
 )
 async def check_union_member(
@@ -61,7 +62,9 @@ async def check_union_member(
         ),
         func.upper(UnionMember.surname) == surname,
     ).one_or_none()
-
+    if user:
+        if user.is_deleted:
+            raise UserIsDeleted()
     if v == '1':
         return bool(user)
 
@@ -111,15 +114,21 @@ def update_list(
         )
 
         if db_user:
+            if db_user.is_deleted:
+                raise UserIsDeleted()
+
+        if db_user:
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
+            db_user.is_deleted = False
         else:
             db.session.add(
                 UnionMember(
                     surname=user.username,
                     union_number=user.union_number,
                     student_number=user.student_number,
+                    is_deleted=False,
                 )
             )
         db.session.flush()

@@ -111,4 +111,3 @@ def test_post_list_duplicates(users, client):
     body = {'users': users}
     res = client.post(url, json=body)
     assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()
-

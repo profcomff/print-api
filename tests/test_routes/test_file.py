@@ -130,13 +130,7 @@ def test_upload_is_deleted(pin_pdf, client, add_is_deleted_flag):
 
 def test_patch_is_deleted(pin_pdf, client, add_is_deleted_flag):
     pin = pin_pdf
-    body = {
-        "options": {
-            "pages": "",
-            "copies": 2,
-            "two_sided": False
-        }
-    }
+    body = {"options": {"pages": "", "copies": 2, "two_sided": False}}
     res = client.patch(f"{url}/{pin}", json=body)
     assert res.status_code == status.HTTP_410_GONE
 

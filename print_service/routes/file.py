@@ -24,8 +24,8 @@ from print_service.exceptions import (
     TooLargeSize,
     TooManyPages,
     UnprocessableFileInstance,
-    UserNotFound,
     UserIsDeleted,
+    UserNotFound,
 )
 from print_service.models import File as FileModel
 from print_service.models import UnionMember

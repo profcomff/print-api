@@ -20,8 +20,8 @@ from print_service.exceptions import (
     TooManyPages,
     UnionStudentDuplicate,
     UnprocessableFileInstance,
-    UserNotFound,
     UserIsDeleted,
+    UserNotFound,
 )
 from print_service.routes.base import app
 from print_service.settings import get_settings
@@ -82,7 +82,7 @@ async def user_is_deleted(req: starlette.requests.Request, exc: TerminalTokenNot
         content=StatusResponseModel(
             status="Error", message="User is deleted", ru="Пользователь удалён из базы"
         ).model_dump(),
-        status_code=410
+        status_code=410,
     )
 
 

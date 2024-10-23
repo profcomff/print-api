@@ -9,7 +9,7 @@ from pydantic import constr, validate_call
 from sqlalchemy import and_, func, or_
 
 from print_service import __version__
-from print_service.exceptions import UnionStudentDuplicate, UserNotFound, UserIsDeleted
+from print_service.exceptions import UnionStudentDuplicate, UserIsDeleted, UserNotFound
 from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import get_settings
@@ -40,10 +40,7 @@ class UpdateUserList(BaseModel):
 @router.get(
     '/is_union_member',
     status_code=202,
-    responses={
-        404: {'detail': 'User not found'},
-        410: {'detail': 'User is deleted'}
-    },
+    responses={404: {'detail': 'User not found'}, 410: {'detail': 'User is deleted'}},
 )
 async def check_union_member(
     surname: constr(strip_whitespace=True, to_upper=True, min_length=1),

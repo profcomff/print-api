@@ -4,6 +4,7 @@ from os.path import abspath, exists
 
 import aiofiles
 import aiofiles.os
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
@@ -159,7 +160,10 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     response_model=SendOutput,
 )
 async def upload_file(
-    pin: str, file: UploadFile = File(...), settings: Settings = Depends(get_settings)
+    pin: str,
+    file: UploadFile = File(...),
+    settings: Settings = Depends(get_settings),
+    _=Depends(UnionAuth(scopes=["print.file.create"], allow_none=False, auto_error=True)),
 ):
     """Загрузить файл на сервер.
 
@@ -229,7 +233,10 @@ async def upload_file(
     response_model=SendOutput,
 )
 async def update_file_options(
-    pin: str, inp: SendInputUpdate, settings: Settings = Depends(get_settings)
+    pin: str,
+    inp: SendInputUpdate,
+    settings: Settings = Depends(get_settings),
+    _=Depends(UnionAuth(scopes=["print.file.update"], allow_none=False, auto_error=True)),
 ):
     """Обновляет настройки печати.
 
@@ -275,7 +282,11 @@ async def update_file_options(
     },
     response_model=ReceiveOutput,
 )
-async def print_file(pin: str, settings: Settings = Depends(get_settings)):
+async def print_file(
+    pin: str,
+    settings: Settings = Depends(get_settings),
+    _=Depends(UnionAuth(scopes=["print.file.get"], allow_none=False, auto_error=True)),
+):
     """Получить файл для печати.
 
     Требует пин-код, полученный в методе POST `/file`. Файл можно скачать

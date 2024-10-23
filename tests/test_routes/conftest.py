@@ -24,6 +24,13 @@ def union_member_user(dbsession):
 
 
 @pytest.fixture(scope='function')
+def add_is_deleted_flag(dbsession):
+    db_user = dbsession.query(UnionMember).filter(UnionMember.id == 42).one_or_none()
+    db_user.is_deleted = True
+    dbsession.commit()
+
+
+@pytest.fixture(scope='function')
 def uploaded_file_db(dbsession, union_member_user, client):
     body = {
         "surname": union_member_user['surname'],

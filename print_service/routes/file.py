@@ -25,6 +25,7 @@ from print_service.exceptions import (
     TooLargeSize,
     TooManyPages,
     UnprocessableFileInstance,
+    UserIsDeleted,
     UserNotFound,
 )
 from print_service.models import File as FileModel
@@ -105,6 +106,7 @@ class ReceiveOutput(BaseModel):
     responses={
         403: {'model': StatusResponseModel, 'detail': 'User error'},
         500: {'model': StatusResponseModel, 'detail': 'PIN generate error'},
+        410: {'model': StatusResponseModel, 'detail': 'User is deleted'},
     },
     response_model=SendOutput,
 )
@@ -123,6 +125,9 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
         ),
         func.upper(UnionMember.surname) == inp.surname.upper(),
     ).one_or_none()
+    if user:
+        if user.is_deleted:
+            raise UserIsDeleted()
     if not user:
         raise NotInUnion()
     try:
@@ -156,6 +161,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
         415: {'model': StatusResponseModel, 'detail': 'File error'},
         413: {'model': StatusResponseModel, 'detail': 'Too large file'},
         416: {'model': StatusResponseModel, 'detail': 'Invalid page request'},
+        410: {'model': StatusResponseModel, 'detail': 'User is deleted'},
     },
     response_model=SendOutput,
 )
@@ -179,6 +185,10 @@ async def upload_file(
         .order_by(FileModel.created_at.desc())
         .one_or_none()
     )
+    if file_model:
+        if file_model.owner.is_deleted:
+            raise UserIsDeleted()
+
     if not file_model:
         await file.close()
         raise PINNotFound(pin)
@@ -229,6 +239,7 @@ async def upload_file(
         404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
         413: {'model': StatusResponseModel, 'detail': 'Too many pages'},
         416: {'model': StatusResponseModel, 'detail': 'Invalid page request'},
+        410: {'model': StatusResponseModel, 'detail': 'User is deleted'},
     },
     response_model=SendOutput,
 )
@@ -249,6 +260,11 @@ async def update_file_options(
         .order_by(FileModel.created_at.desc())
         .one_or_none()
     )
+
+    if file_model:
+        if file_model.owner.is_deleted:
+            raise UserIsDeleted()
+
     print(options)
     if not file_model:
         raise PINNotFound(pin)

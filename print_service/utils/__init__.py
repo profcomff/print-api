@@ -62,6 +62,7 @@ def get_file(dbsession, pin: str or list[str]):
         .order_by(FileModel.created_at.desc())
         .all()
     )
+
     if len(pin) != len(files):
         raise FileNotFound(len(pin) - len(files))
 

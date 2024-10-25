@@ -1,8 +1,8 @@
 """Add is_deleted field to UnionMember table
 
-Revision ID: dddf1cc0c593
+Revision ID: 120e06710249
 Revises: a68c6bb2972c
-Create Date: 2024-10-19 19:49:20.361627
+Create Date: 2024-10-25 16:40:35.109586
 
 """
 
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision = 'dddf1cc0c593'
+revision = '120e06710249'
 down_revision = 'a68c6bb2972c'
 branch_labels = None
 depends_on = None
@@ -23,7 +23,6 @@ def upgrade():
     op.add_column('union_member', sa.Column('is_deleted', sa.Boolean(), nullable=True))
     op.execute(f'UPDATE "union_member" SET  is_deleted = False')
     op.alter_column('union_member', sa.Column('is_deleted', sa.Boolean(), nullable=False))
-
     # ### end Alembic commands ###
 
 

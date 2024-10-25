@@ -45,7 +45,11 @@ class File(Model):
     number_of_pages: Mapped[int] = Column(Integer)
     source: Mapped[str] = Column(String, default='unknown', nullable=False)
 
-    owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')
+    owner: Mapped[UnionMember] = relationship(
+        'UnionMember',
+        primaryjoin="and_(File.owner_id==UnionMember.id, not_(UnionMember.is_deleted))",
+        back_populates='files',
+    )
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')
 
     @property
@@ -88,6 +92,10 @@ class PrintFact(Model):
     owner_id: Mapped[int] = Column(Integer, ForeignKey('union_member.id'), nullable=False)
     created_at: Mapped[datetime] = Column(DateTime, nullable=False, default=datetime.utcnow)
 
-    owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='print_facts')
+    owner: Mapped[UnionMember] = relationship(
+        'UnionMember',
+        primaryjoin="and_(PrintFact.owner_id == UnionMember.id, not_(UnionMember.is_deleted))",
+        back_populates='print_facts',
+    )
     file: Mapped[File] = relationship('File', back_populates='print_facts')
     sheets_used: Mapped[int] = Column(Integer)

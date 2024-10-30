@@ -35,7 +35,7 @@ def test_get_is_deleted(client, union_member_user, add_is_deleted_flag):
         'number': '6666667',
     }
     res = client.get(url, params=params)
-    assert res.status_code == status.HTTP_410_GONE
+    assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_post_success(client, dbsession):
@@ -50,7 +50,7 @@ def test_post_success(client, dbsession):
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
-    dbsession.query(UnionMember).filter(
+    UnionMember.query(session=dbsession).filter(
         UnionMember.surname == body['users'][0]['username'],
         UnionMember.union_number == body['users'][0]['union_number'],
         UnionMember.student_number == body['users'][0]['student_number'],
@@ -69,7 +69,7 @@ def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
         ],
     }
     res = client.post(url, data=json.dumps(body))
-    assert res.status_code == status.HTTP_410_GONE
+    assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.parametrize(

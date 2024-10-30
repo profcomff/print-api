@@ -12,10 +12,6 @@ class TerminalTokenNotFound(ObjectNotFound):
     pass
 
 
-class UserIsDeleted(Exception):
-    pass
-
-
 class TerminalQRNotFound(ObjectNotFound):
     pass
 

@@ -9,14 +9,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Boolean
 
-
-@as_declarative()
-class Model:
-    pass
+from print_service.models.base import BaseDbModel
 
 
-class UnionMember(Model):
-    __tablename__ = 'union_member'
+class UnionMember(BaseDbModel):
+    #    __tablename__ = 'union_member'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     surname: Mapped[str] = mapped_column(String, nullable=False)
@@ -28,8 +25,8 @@ class UnionMember(Model):
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='owner')
 
 
-class File(Model):
-    __tablename__ = 'file'
+class File(BaseDbModel):
+    #    __tablename__ = 'file'
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     pin: Mapped[str] = Column(String, nullable=False)
@@ -84,8 +81,8 @@ class File(Model):
             return len(self.flatten_pages) * self.option_copies
 
 
-class PrintFact(Model):
-    __tablename__ = 'print_fact'
+class PrintFact(BaseDbModel):
+    #    __tablename__ = 'print_fact'
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     file_id: Mapped[int] = Column(Integer, ForeignKey('file.id'), nullable=False)

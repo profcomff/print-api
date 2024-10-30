@@ -25,7 +25,7 @@ def test_post_success(union_member_user, client, dbsession):
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
-    db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
+    db_file = File.query(session=dbsession).filter(File.pin == res.json()['pin']).one_or_none()
     assert db_file is not None
     assert db_file.source == 'webapp'
     body2 = {
@@ -36,7 +36,7 @@ def test_post_success(union_member_user, client, dbsession):
     }
     res2 = client.post(url, data=json.dumps(body2))
     assert res2.status_code == status.HTTP_200_OK
-    db_file2 = dbsession.query(File).filter(File.pin == res2.json()['pin']).one_or_none()
+    db_file2 = File.query(session=dbsession).filter(File.pin == res2.json()['pin']).one_or_none()
     assert db_file2 is not None
     assert db_file2.source == 'unknown'
     dbsession.delete(db_file)
@@ -53,7 +53,7 @@ def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
         "options": {"pages": "", "copies": 1, "two_sided": False},
     }
     res = client.post(url, data=json.dumps(body))
-    assert res.status_code == status.HTTP_410_GONE
+    assert res.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_post_unauthorized_user(client):

@@ -25,7 +25,6 @@ from print_service.exceptions import (
     TooLargeSize,
     TooManyPages,
     UnprocessableFileInstance,
-    UserIsDeleted,
     UserNotFound,
 )
 from print_service.models import File as FileModel
@@ -106,7 +105,6 @@ class ReceiveOutput(BaseModel):
     responses={
         403: {'model': StatusResponseModel, 'detail': 'User error'},
         500: {'model': StatusResponseModel, 'detail': 'PIN generate error'},
-        410: {'model': StatusResponseModel, 'detail': 'User is deleted'},
     },
     response_model=SendOutput,
 )
@@ -115,7 +113,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
 
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
-    user = db.session.query(UnionMember)
+    user = UnionMember.query(session=db.session)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user = user.filter(
@@ -125,9 +123,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
         ),
         func.upper(UnionMember.surname) == inp.surname.upper(),
     ).one_or_none()
-    if user:
-        if user.is_deleted:
-            raise UserIsDeleted()
+
     if not user:
         raise NotInUnion()
     try:
@@ -179,7 +175,7 @@ async def upload_file(
     if file == ...:
         raise FileIsNotReceived()
     file_model = (
-        db.session.query(FileModel)
+        FileModel.query(session=db.session)
         .filter(func.upper(FileModel.pin) == pin.upper())
         .order_by(FileModel.created_at.desc())
         .one_or_none()
@@ -250,7 +246,7 @@ async def update_file_options(
     можно бесконечное количество раз. Можно изменять настройки по одной."""
     options = inp.options.model_dump(exclude_unset=True)
     file_model = (
-        db.session.query(FileModel)
+        FileModel.query(session=db.session)
         .filter(func.upper(FileModel.pin) == pin.upper())
         .order_by(FileModel.created_at.desc())
         .one_or_none()

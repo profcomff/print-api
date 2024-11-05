@@ -1,11 +1,11 @@
 import json
 
 import pytest
+from sqlalchemy import and_, func
 from starlette import status
 
 from print_service.models import UnionMember
 from print_service.settings import get_settings
-from sqlalchemy import and_, func
 
 
 url: str = '/is_union_member'
@@ -51,10 +51,12 @@ def test_post_success(client, dbsession):
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
-    UnionMember.query(session=dbsession).filter(and_(
-        UnionMember.surname == func.upper(body['users'][0]['username']),
-        UnionMember.union_number == func.upper(body['users'][0]['union_number']),
-        UnionMember.student_number == func.upper(body['users'][0]['student_number']))
+    UnionMember.query(session=dbsession).filter(
+        and_(
+            UnionMember.surname == func.upper(body['users'][0]['username']),
+            UnionMember.union_number == func.upper(body['users'][0]['union_number']),
+            UnionMember.student_number == func.upper(body['users'][0]['student_number']),
+        )
     ).delete()
     dbsession.commit()
 
@@ -74,46 +76,38 @@ def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
 
 
 def test_restore_is_deleted(client, dbsession):
-    user = UnionMember(id=5,
-                       surname='test_user',
-                       union_number='123',
-                       student_number='56',
-                       is_deleted=False)
+    user = UnionMember(
+        id=5, surname='test_user', union_number='123', student_number='56', is_deleted=False
+    )
     dbsession.add(user)
     dbsession.commit()
 
     body = {
         'users': [
-            {
-                'username': 'test_user',
-                'union_number': '123',
-                'student_number': '56',
-                'is_deleted': True
-             }
+            {'username': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': True}
         ]
     }
     _ = client.post(url, data=json.dumps(body))
-    res = UnionMember.query(session=dbsession, with_deleted=True).filter(UnionMember.id == 5).one_or_none()
+    res = (
+        UnionMember.query(session=dbsession, with_deleted=True).filter(UnionMember.id == 5).one_or_none()
+    )
     assert res.is_deleted is False
     user.is_deleted = True
     dbsession.commit()
     body = {
         'users': [
-            {
-                'username': 'test_user',
-                'union_number': '123',
-                'student_number': '56',
-                'is_deleted': False
-            }
+            {'username': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': False}
         ]
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_404_NOT_FOUND
-    UnionMember.query(session=dbsession, with_deleted=True).filter(and_(
-        UnionMember.surname == func.upper(body['users'][0]['username']),
-        UnionMember.union_number == func.upper(body['users'][0]['union_number']),
-        UnionMember.student_number == func.upper(body['users'][0]['student_number'])
-    )).delete()
+    UnionMember.query(session=dbsession, with_deleted=True).filter(
+        and_(
+            UnionMember.surname == func.upper(body['users'][0]['username']),
+            UnionMember.union_number == func.upper(body['users'][0]['union_number']),
+            UnionMember.student_number == func.upper(body['users'][0]['student_number']),
+        )
+    ).delete()
     dbsession.commit()
 
 

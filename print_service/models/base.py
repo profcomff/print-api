@@ -1,8 +1,8 @@
 import re
 
 import sqlalchemy
-from sqlalchemy import Integer, not_
-from sqlalchemy.orm import Mapped, Query, Session, as_declarative, declared_attr, mapped_column
+from sqlalchemy import not_
+from sqlalchemy.orm import Query, Session, as_declarative, declared_attr
 
 
 @as_declarative()
@@ -19,7 +19,6 @@ class Base:
 
 class BaseDbModel(Base):
     __abstract__ = True
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     @classmethod
     def query(cls, session: Session, with_deleted: bool = False) -> Query:

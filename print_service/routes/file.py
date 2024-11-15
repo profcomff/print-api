@@ -98,8 +98,11 @@ class ReceiveOutput(BaseModel):
 
 
 # endregion
-def has_send_scope(union_auth: UnionAuth = Depends(UnionAuth(scopes=["print.file.send"], allow_none=True))):
+def has_send_scope(
+    union_auth: UnionAuth = Depends(UnionAuth(scopes=["print.file.send"], allow_none=True))
+):
     return union_auth is not None
+
 
 # region handlers
 @router.post(
@@ -110,17 +113,20 @@ def has_send_scope(union_auth: UnionAuth = Depends(UnionAuth(scopes=["print.file
     },
     response_model=SendOutput,
 )
-async def send(inp: SendInput, 
-               has_send_scope: bool = Depends(has_send_scope),  
-               settings: Settings = Depends(get_settings),
+async def send(
+    inp: SendInput,
+    has_send_scope: bool = Depends(has_send_scope),
+    settings: Settings = Depends(get_settings),
 ):
     """Получить пин код для загрузки и скачивания файла.
 
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
     if not has_send_scope and inp.number is None:
-        raise HTTPException(status_code=400, detail="Поле number обязательно для пользователей без скоупа print.file.send")
-
+        raise HTTPException(
+            status_code=400,
+            detail="Поле number обязательно для пользователей без скоупа print.file.send",
+        )
 
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:

@@ -56,10 +56,10 @@ async def check_union_member(
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user: UnionMember = user.filter(
-            or_(
-                func.upper(UnionMember.student_number) == number,
-                func.upper(UnionMember.union_number) == number,
-            ),
+        or_(
+            func.upper(UnionMember.student_number) == number,
+            func.upper(UnionMember.union_number) == number,
+        ),
         func.upper(UnionMember.surname) == surname,
     ).one_or_none()
 

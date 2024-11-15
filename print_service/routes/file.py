@@ -4,6 +4,7 @@ from os.path import abspath, exists
 
 import aiofiles
 import aiofiles.os
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
@@ -63,7 +64,8 @@ class SendInput(BaseModel):
         description='Фамилия',
         example='Иванов',
     )
-    number: str = Field(
+    number: str | None = Field(
+        default=None,
         description='Номер профсоюзного или студенческого билетов',
         example='1015000',
     )
@@ -96,7 +98,8 @@ class ReceiveOutput(BaseModel):
 
 
 # endregion
-
+def has_send_scope(union_auth: UnionAuth = Depends(UnionAuth(scopes=["print.file.send"], allow_none=True))):
+    return union_auth is not None
 
 # region handlers
 @router.post(
@@ -107,21 +110,33 @@ class ReceiveOutput(BaseModel):
     },
     response_model=SendOutput,
 )
-async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
+async def send(inp: SendInput, 
+               has_send_scope: bool = Depends(has_send_scope),  
+               settings: Settings = Depends(get_settings),
+):
     """Получить пин код для загрузки и скачивания файла.
 
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
+    if not has_send_scope and inp.number is None:
+        raise HTTPException(status_code=400, detail="Поле number обязательно для пользователей без скоупа print.file.send")
+
+
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
-    user = user.filter(
-        or_(
-            func.upper(UnionMember.student_number) == inp.number.upper(),
-            func.upper(UnionMember.union_number) == inp.number.upper(),
-        ),
-        func.upper(UnionMember.surname) == inp.surname.upper(),
-    ).one_or_none()
+    if inp.number is not None:
+        user = user.filter(
+            or_(
+                func.upper(UnionMember.student_number) == inp.number.upper(),
+                func.upper(UnionMember.union_number) == inp.number.upper(),
+            ),
+            func.upper(UnionMember.surname) == inp.surname.upper(),
+        ).one_or_none()
+    else:
+        user = user.filter(
+            func.upper(UnionMember.surname) == inp.surname.upper(),
+        )
     if not user:
         raise NotInUnion()
     try:

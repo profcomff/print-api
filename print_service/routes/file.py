@@ -123,10 +123,7 @@ async def send(
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
     if not has_send_scope and inp.number is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Поле number обязательно для пользователей без скоупа print.file.send",
-        )
+        raise NotInUnion()
 
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:

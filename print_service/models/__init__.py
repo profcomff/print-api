@@ -19,7 +19,7 @@ class UnionMember(BaseDbModel):
     surname: Mapped[str] = mapped_column(String, nullable=False)
     union_number: Mapped[str] = mapped_column(String, nullable=True)
     student_number: Mapped[str] = mapped_column(String, nullable=True)
-    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     files: Mapped[list[File]] = relationship('File', back_populates='owner')
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='owner')

@@ -22,7 +22,7 @@ settings = get_settings()
 
 # region schemas
 class UserCreate(BaseModel):
-    username: constr(strip_whitespace=True, to_upper=True, min_length=1)
+    surname: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
     student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
 
@@ -112,19 +112,11 @@ def update_list(
             if db_user.is_deleted:
                 raise UserNotFound
             else:
-                db_user.surname = user.username
-                db_user.union_number = user.union_number
-                db_user.student_number = user.student_number
-        else:
-            db.session.add(
-                UnionMember(
-                    surname=user.username,
-                    union_number=user.union_number,
-                    student_number=user.student_number,
+                UnionMember.update(
+                    session=db.session, id=db_user.id, **user.model_dump(exclude_unset=False)
                 )
-            )
-        db.session.flush()
-
+        else:
+            UnionMember.create(session=db.session, **user.model_dump(exclude_unset=False))
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
 

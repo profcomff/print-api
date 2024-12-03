@@ -131,14 +131,18 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     except RuntimeError:
         raise PINGenerateError()
     filename = generate_filename(inp.filename)
-    file_model = FileModel(pin=pin, file=filename, source=inp.source)
-    file_model.owner = user
-    file_model.option_copies = inp.options.copies
-    file_model.option_pages = inp.options.pages
-    file_model.option_two_sided = inp.options.two_sided
-    db.session.add(file_model)
-    db.session.commit()
+    file_model = FileModel.create(
+        session=db.session,
+        pin=pin,
+        file=filename,
+        source=inp.source,
+        owner=user,
+        option_copies=inp.options.copies,
+        option_pages=inp.options.pages,
+        option_two_sided=inp.options.two_sided,
+    )
 
+    db.session.commit()
     return {
         'pin': file_model.pin,
         'options': {

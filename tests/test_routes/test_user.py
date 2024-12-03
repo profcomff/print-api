@@ -43,7 +43,7 @@ def test_post_success(client, dbsession):
     body = {
         'users': [
             {
-                'username': 'paul',
+                'surname': 'paul',
                 'union_number': '1966',
                 'student_number': '1967',
             }
@@ -53,7 +53,7 @@ def test_post_success(client, dbsession):
     assert res.status_code == status.HTTP_200_OK
     UnionMember.query(session=dbsession).filter(
         and_(
-            UnionMember.surname == func.upper(body['users'][0]['username']),
+            UnionMember.surname == func.upper(body['users'][0]['surname']),
             UnionMember.union_number == func.upper(body['users'][0]['union_number']),
             UnionMember.student_number == func.upper(body['users'][0]['student_number']),
         )
@@ -65,7 +65,7 @@ def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
     body = {
         'users': [
             {
-                'username': 'new_test',
+                'surname': 'new_test',
                 'union_number': '6666667',
                 'student_number': '13033224',
             }
@@ -76,15 +76,19 @@ def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
 
 
 def test_restore_is_deleted(client, dbsession):
-    user = UnionMember(
-        id=5, surname='test_user', union_number='123', student_number='56', is_deleted=False
+    user = UnionMember.create(
+        session=dbsession,
+        id=5,
+        surname='test_user',
+        union_number='123',
+        student_number='56',
+        is_deleted=False,
     )
-    dbsession.add(user)
     dbsession.commit()
 
     body = {
         'users': [
-            {'username': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': True}
+            {'surname': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': True}
         ]
     }
     _ = client.post(url, data=json.dumps(body))
@@ -96,14 +100,14 @@ def test_restore_is_deleted(client, dbsession):
     dbsession.commit()
     body = {
         'users': [
-            {'username': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': False}
+            {'surname': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': False}
         ]
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_404_NOT_FOUND
     UnionMember.query(session=dbsession, with_deleted=True).filter(
         and_(
-            UnionMember.surname == func.upper(body['users'][0]['username']),
+            UnionMember.surname == func.upper(body['users'][0]['surname']),
             UnionMember.union_number == func.upper(body['users'][0]['union_number']),
             UnionMember.student_number == func.upper(body['users'][0]['student_number']),
         )
@@ -117,12 +121,12 @@ def test_restore_is_deleted(client, dbsession):
         pytest.param(
             [
                 {
-                    'username': 'paul',
+                    'surname': 'paul',
                     'union_number': '404man',
                     'student_number': '30311',
                 },
                 {
-                    'username': 'marty',
+                    'surname': 'marty',
                     'union_number': '404man',
                     'student_number': '303112',
                 },
@@ -132,12 +136,12 @@ def test_restore_is_deleted(client, dbsession):
         pytest.param(
             [
                 {
-                    'username': 'alice',
+                    'surname': 'alice',
                     'union_number': '500',
                     'student_number': '42',
                 },
                 {
-                    'username': 'polly',
+                    'surname': 'polly',
                     'union_number': '503',
                     'student_number': '42',
                 },

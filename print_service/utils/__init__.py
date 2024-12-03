@@ -86,8 +86,9 @@ def get_file(dbsession, pin: str or list[str]):
         if f.flatten_pages:
             if number_of_pages > max(f.flatten_pages):
                 raise InvalidPageRequest()
-        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count)
-        dbsession.add(file_model)
+        PrintFact.create(
+            session=dbsession, file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count
+        )
         dbsession.commit()
     return result
 

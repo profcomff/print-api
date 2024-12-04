@@ -110,8 +110,8 @@ class ReceiveOutput(BaseModel):
     response_model=SendOutput,
 )
 async def send(
-    inp: SendInput,    
-    _ = Depends(UnionAuth(scopes=["print.file.send"]), allow_none=True),
+    inp: SendInput,
+    _=Depends(UnionAuth(scopes=["print.file.send"]), allow_none=True),
     settings: Settings = Depends(get_settings),
 ):
     """Получить пин код для загрузки и скачивания файла.
@@ -136,7 +136,7 @@ async def send(
     else:
         if not "print.file.send" in [scope["name"] for scope in user.get('session_scopes')]:
             raise NotInUnion()
-            
+
     if not user:
         raise NotInUnion()
     try:

@@ -98,10 +98,6 @@ class ReceiveOutput(BaseModel):
 
 
 # endregion
-def has_send_scope(
-    union_auth: UnionAuth = Depends(UnionAuth(scopes=["print.file.send"], allow_none=True))
-):
-    return union_auth is not None
 
 
 # region handlers
@@ -114,8 +110,8 @@ def has_send_scope(
     response_model=SendOutput,
 )
 async def send(
-    inp: SendInput,
-    has_send_scope: bool = Depends(has_send_scope),
+    inp: SendInput,    
+    _ = Depends(UnionAuth(scopes=["print.file.send"]), allow_none=True),
     settings: Settings = Depends(get_settings),
 ):
     """Получить пин код для загрузки и скачивания файла.
@@ -128,6 +124,7 @@ async def send(
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
+
     if inp.number is not None:
         user = user.filter(
             or_(
@@ -137,9 +134,9 @@ async def send(
             func.upper(UnionMember.surname) == inp.surname.upper(),
         ).one_or_none()
     else:
-        user = user.filter(
-            func.upper(UnionMember.surname) == inp.surname.upper(),
-        )
+        if not "print.file.send" in [scope["name"] for scope in user.get('session_scopes')]:
+            raise NotInUnion()
+            
     if not user:
         raise NotInUnion()
     try:

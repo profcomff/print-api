@@ -46,7 +46,7 @@ class UpdateUserList(BaseModel):
 )
 async def check_union_member(
     surname: constr(strip_whitespace=True, to_upper=True, min_length=1),
-    number: Optional[str] = constr(strip_whitespace=True, to_upper=True, min_length=1),
+    number: constr(strip_whitespace=True, to_upper=True, min_length=1),
     v: Optional[str] = __version__,
 ):
     """Проверяет наличие пользователя в списке."""

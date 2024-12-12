@@ -60,7 +60,8 @@ class PrintOptions(BaseModel):
 
 
 class SendInput(BaseModel):
-    surname: str = Field(
+    surname: str | None = Field(
+        default=None,
         description='Фамилия',
         example='Иванов',
     )
@@ -111,7 +112,7 @@ class ReceiveOutput(BaseModel):
 )
 async def send(
     inp: SendInput,
-    _=Depends(UnionAuth(scopes=["print.file.send"]), allow_none=True),
+    user_auth=Depends(UnionAuth(scopes=["print.file.send"])),
     settings: Settings = Depends(get_settings),
 ):
     """Получить пин код для загрузки и скачивания файла.
@@ -125,7 +126,7 @@ async def send(
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
 
-    if inp.number is not None:
+    if inp.number is not None and inp.surname is not None:
         user = user.filter(
             or_(
                 func.upper(UnionMember.student_number) == inp.number.upper(),
@@ -134,10 +135,10 @@ async def send(
             func.upper(UnionMember.surname) == inp.surname.upper(),
         ).one_or_none()
     else:
-        if not "print.file.send" in [scope["name"] for scope in user.get('session_scopes')]:
+        if not "print.file.send" in [scope["name"] for scope in user_auth.get('session_scopes')]:
             raise NotInUnion()
 
-    if not user:
+    if user is None:
         raise NotInUnion()
     try:
         pin = generate_pin(db.session)

@@ -1,7 +1,5 @@
 import uvicorn
 
-from print_service.routes.base import app
-
 
 if __name__ == '__main__':
-    uvicorn.run(app)
+    uvicorn.run("print_service.routes.base:app", reload=True)

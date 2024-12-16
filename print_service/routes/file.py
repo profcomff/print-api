@@ -112,31 +112,31 @@ class ReceiveOutput(BaseModel):
 )
 async def send(
     inp: SendInput,
-    user_auth=Depends(UnionAuth(scopes=["print.file.send"])),
+    user_auth=Depends(UnionAuth(allow_none=True)),
     settings: Settings = Depends(get_settings),
 ):
     """Получить пин код для загрузки и скачивания файла.
 
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
-    if not has_send_scope and inp.number is None:
-        raise NotInUnion()
-
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
 
-    if inp.number is not None and inp.surname is not None:
+    if (inp.number is not None) and (inp.surname is not None):
         user = user.filter(
             or_(
                 func.upper(UnionMember.student_number) == inp.number.upper(),
                 func.upper(UnionMember.union_number) == inp.number.upper(),
             ),
             func.upper(UnionMember.surname) == inp.surname.upper(),
-        ).one_or_none()
+        )
+
     else:
         if not "print.file.send" in [scope["name"] for scope in user_auth.get('session_scopes')]:
             raise NotInUnion()
+
+    user = user.one_or_none()
 
     if user is None:
         raise NotInUnion()

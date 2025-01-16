@@ -9,26 +9,24 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Boolean
 
-
-@as_declarative()
-class Model:
-    pass
+from print_service.models.base import BaseDbModel
 
 
-class UnionMember(Model):
-    __tablename__ = 'union_member'
+class UnionMember(BaseDbModel):
+    #    __tablename__ = 'union_member'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     surname: Mapped[str] = mapped_column(String, nullable=False)
     union_number: Mapped[str] = mapped_column(String, nullable=True)
     student_number: Mapped[str] = mapped_column(String, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     files: Mapped[list[File]] = relationship('File', back_populates='owner')
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='owner')
 
 
-class File(Model):
-    __tablename__ = 'file'
+class File(BaseDbModel):
+    #    __tablename__ = 'file'
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     pin: Mapped[str] = Column(String, nullable=False)
@@ -44,7 +42,11 @@ class File(Model):
     number_of_pages: Mapped[int] = Column(Integer)
     source: Mapped[str] = Column(String, default='unknown', nullable=False)
 
-    owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='files')
+    owner: Mapped[UnionMember] = relationship(
+        'UnionMember',
+        primaryjoin="and_(File.owner_id==UnionMember.id, not_(UnionMember.is_deleted))",
+        back_populates='files',
+    )
     print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='file')
 
     @property
@@ -79,14 +81,18 @@ class File(Model):
             return len(self.flatten_pages) * self.option_copies
 
 
-class PrintFact(Model):
-    __tablename__ = 'print_fact'
+class PrintFact(BaseDbModel):
+    #    __tablename__ = 'print_fact'
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     file_id: Mapped[int] = Column(Integer, ForeignKey('file.id'), nullable=False)
     owner_id: Mapped[int] = Column(Integer, ForeignKey('union_member.id'), nullable=False)
     created_at: Mapped[datetime] = Column(DateTime, nullable=False, default=datetime.utcnow)
 
-    owner: Mapped[UnionMember] = relationship('UnionMember', back_populates='print_facts')
+    owner: Mapped[UnionMember] = relationship(
+        'UnionMember',
+        primaryjoin="and_(PrintFact.owner_id == UnionMember.id, not_(UnionMember.is_deleted))",
+        back_populates='print_facts',
+    )
     file: Mapped[File] = relationship('File', back_populates='print_facts')
     sheets_used: Mapped[int] = Column(Integer)

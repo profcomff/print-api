@@ -112,7 +112,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
 
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
-    user = db.session.query(UnionMember)
+    user = UnionMember.query(session=db.session)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user = user.filter(
@@ -122,6 +122,7 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
         ),
         func.upper(UnionMember.surname) == inp.surname.upper(),
     ).one_or_none()
+
     if not user:
         raise NotInUnion()
     try:
@@ -129,14 +130,18 @@ async def send(inp: SendInput, settings: Settings = Depends(get_settings)):
     except RuntimeError:
         raise PINGenerateError()
     filename = generate_filename(inp.filename)
-    file_model = FileModel(pin=pin, file=filename, source=inp.source)
-    file_model.owner = user
-    file_model.option_copies = inp.options.copies
-    file_model.option_pages = inp.options.pages
-    file_model.option_two_sided = inp.options.two_sided
-    db.session.add(file_model)
-    db.session.commit()
+    file_model = FileModel.create(
+        session=db.session,
+        pin=pin,
+        file=filename,
+        source=inp.source,
+        owner=user,
+        option_copies=inp.options.copies,
+        option_pages=inp.options.pages,
+        option_two_sided=inp.options.two_sided,
+    )
 
+    db.session.commit()
     return {
         'pin': file_model.pin,
         'options': {
@@ -170,11 +175,12 @@ async def upload_file(
     if file == ...:
         raise FileIsNotReceived()
     file_model = (
-        db.session.query(FileModel)
+        FileModel.query(session=db.session)
         .filter(func.upper(FileModel.pin) == pin.upper())
         .order_by(FileModel.created_at.desc())
         .one_or_none()
     )
+
     if not file_model:
         await file.close()
         raise PINNotFound(pin)
@@ -237,11 +243,12 @@ async def update_file_options(
     можно бесконечное количество раз. Можно изменять настройки по одной."""
     options = inp.options.model_dump(exclude_unset=True)
     file_model = (
-        db.session.query(FileModel)
+        FileModel.query(session=db.session)
         .filter(func.upper(FileModel.pin) == pin.upper())
         .order_by(FileModel.created_at.desc())
         .one_or_none()
     )
+
     print(options)
     if not file_model:
         raise PINNotFound(pin)

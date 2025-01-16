@@ -31,7 +31,7 @@ def generate_pin(session: Session):
     for i in range(15):
         pin = ''.join(random.choice(settings.PIN_SYMBOLS) for _ in range(settings.PIN_LENGTH))
         cnt = (
-            session.query(File)
+            File.query(session=session)
             .filter(
                 File.pin == pin,
                 File.created_at + timedelta(hours=settings.STORAGE_TIME) >= datetime.utcnow(),
@@ -57,11 +57,12 @@ def generate_filename(original_filename: str):
 def get_file(dbsession, pin: str or list[str]):
     pin = [pin.upper()] if isinstance(pin, str) else tuple(p.upper() for p in pin)
     files: list[FileModel] = (
-        dbsession.query(FileModel)
+        FileModel.query(session=dbsession)
         .filter(func.upper(FileModel.pin).in_(pin))
         .order_by(FileModel.created_at.desc())
         .all()
     )
+
     if len(pin) != len(files):
         raise FileNotFound(len(pin) - len(files))
 
@@ -85,8 +86,9 @@ def get_file(dbsession, pin: str or list[str]):
         if f.flatten_pages:
             if number_of_pages > max(f.flatten_pages):
                 raise InvalidPageRequest()
-        file_model = PrintFact(file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count)
-        dbsession.add(file_model)
+        PrintFact.create(
+            session=dbsession, file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count
+        )
         dbsession.commit()
     return result
 

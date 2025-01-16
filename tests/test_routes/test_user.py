@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from sqlalchemy import and_, func
 from starlette import status
 
 from print_service.models import UnionMember
@@ -29,22 +30,87 @@ def test_get_not_found(client):
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_get_is_deleted(client, union_member_user, add_is_deleted_flag):
+    params = {
+        'surname': 'test',
+        'number': '6666667',
+    }
+    res = client.get(url, params=params)
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_post_success(client, dbsession):
     body = {
         'users': [
             {
-                'username': 'paul',
+                'surname': 'paul',
                 'union_number': '1966',
                 'student_number': '1967',
             }
-        ],
+        ]
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
-    dbsession.query(UnionMember).filter(
-        UnionMember.surname == body['users'][0]['username'],
-        UnionMember.union_number == body['users'][0]['union_number'],
-        UnionMember.student_number == body['users'][0]['student_number'],
+    UnionMember.query(session=dbsession).filter(
+        and_(
+            UnionMember.surname == func.upper(body['users'][0]['surname']),
+            UnionMember.union_number == func.upper(body['users'][0]['union_number']),
+            UnionMember.student_number == func.upper(body['users'][0]['student_number']),
+        )
+    ).delete()
+    dbsession.commit()
+
+
+def test_post_is_deleted(client, union_member_user, add_is_deleted_flag):
+    body = {
+        'users': [
+            {
+                'surname': 'new_test',
+                'union_number': '6666667',
+                'student_number': '13033224',
+            }
+        ]
+    }
+    res = client.post(url, data=json.dumps(body))
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_restore_is_deleted(client, dbsession):
+    user = UnionMember.create(
+        session=dbsession,
+        id=5,
+        surname='test_user',
+        union_number='123',
+        student_number='56',
+        is_deleted=False,
+    )
+    dbsession.commit()
+
+    body = {
+        'users': [
+            {'surname': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': True}
+        ]
+    }
+    _ = client.post(url, data=json.dumps(body))
+    res = (
+        UnionMember.query(session=dbsession, with_deleted=True).filter(UnionMember.id == 5).one_or_none()
+    )
+    assert res.is_deleted is False
+    user.is_deleted = True
+    dbsession.commit()
+    body = {
+        'users': [
+            {'surname': 'test_user', 'union_number': '123', 'student_number': '56', 'is_deleted': False}
+        ]
+    }
+    res = client.post(url, data=json.dumps(body))
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+    UnionMember.query(session=dbsession, with_deleted=True).filter(
+        and_(
+            UnionMember.surname == func.upper(body['users'][0]['surname']),
+            UnionMember.union_number == func.upper(body['users'][0]['union_number']),
+            UnionMember.student_number == func.upper(body['users'][0]['student_number']),
+        )
     ).delete()
     dbsession.commit()
 
@@ -55,12 +121,12 @@ def test_post_success(client, dbsession):
         pytest.param(
             [
                 {
-                    'username': 'paul',
+                    'surname': 'paul',
                     'union_number': '404man',
                     'student_number': '30311',
                 },
                 {
-                    'username': 'marty',
+                    'surname': 'marty',
                     'union_number': '404man',
                     'student_number': '303112',
                 },
@@ -70,12 +136,12 @@ def test_post_success(client, dbsession):
         pytest.param(
             [
                 {
-                    'username': 'alice',
+                    'surname': 'alice',
                     'union_number': '500',
                     'student_number': '42',
                 },
                 {
-                    'username': 'polly',
+                    'surname': 'polly',
                     'union_number': '503',
                     'student_number': '42',
                 },

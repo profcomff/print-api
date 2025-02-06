@@ -23,8 +23,10 @@ class UnionMember(Model):
     union_number: Mapped[str] = mapped_column(String, nullable=True)
     student_number: Mapped[str] = mapped_column(String, nullable=True)
 
-    files: Mapped[list[File]] = relationship('File', back_populates='owner')
-    print_facts: Mapped[list[PrintFact]] = relationship('PrintFact', back_populates='owner')
+    files: Mapped[list[File]] = relationship('File', back_populates='owner', lazy="joined")
+    print_facts: Mapped[list[PrintFact]] = relationship(
+        'PrintFact', back_populates='owner', lazy="joined"
+    )
 
 
 class File(Model):

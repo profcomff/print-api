@@ -22,7 +22,7 @@ settings = get_settings()
 
 # region schemas
 class UserCreate(BaseModel):
-    username: constr(strip_whitespace=True, to_upper=True, min_length=1)
+    surname: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
     student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
 
@@ -40,9 +40,7 @@ class UpdateUserList(BaseModel):
 @router.get(
     '/is_union_member',
     status_code=202,
-    responses={
-        404: {'detail': 'User not found'},
-    },
+    responses={404: {'detail': 'User not found'}},
 )
 async def check_union_member(
     surname: constr(strip_whitespace=True, to_upper=True, min_length=1),
@@ -51,7 +49,7 @@ async def check_union_member(
 ):
     """Проверяет наличие пользователя в списке."""
     surname = surname.upper()
-    user = db.session.query(UnionMember)
+    user = UnionMember.query(session=db.session)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user: UnionMember = user.filter(
@@ -94,7 +92,7 @@ def update_list(
 
     for user in input.users:
         db_user: UnionMember = (
-            db.session.query(UnionMember)
+            UnionMember.query(session=db.session)
             .filter(
                 or_(
                     and_(
@@ -111,19 +109,9 @@ def update_list(
         )
 
         if db_user:
-            db_user.surname = user.username
-            db_user.union_number = user.union_number
-            db_user.student_number = user.student_number
+            UnionMember.update(session=db.session, id=db_user.id, **user.model_dump(exclude_unset=False))
         else:
-            db.session.add(
-                UnionMember(
-                    surname=user.username,
-                    union_number=user.union_number,
-                    student_number=user.student_number,
-                )
-            )
-        db.session.flush()
-
+            UnionMember.create(session=db.session, **user.model_dump(exclude_unset=False))
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
 

@@ -92,7 +92,7 @@ def update_list(
 
     for user in input.users:
         db_user: UnionMember = (
-            UnionMember.query(session=db.session, with_deleted=True)
+            UnionMember.query(session=db.session)
             .filter(
                 or_(
                     and_(
@@ -109,12 +109,7 @@ def update_list(
         )
 
         if db_user:
-            if db_user.is_deleted:
-                raise UserNotFound
-            else:
-                UnionMember.update(
-                    session=db.session, id=db_user.id, **user.model_dump(exclude_unset=False)
-                )
+            UnionMember.update(session=db.session, id=db_user.id, **user.model_dump(exclude_unset=False))
         else:
             UnionMember.create(session=db.session, **user.model_dump(exclude_unset=False))
     db.session.commit()

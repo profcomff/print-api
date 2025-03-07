@@ -50,6 +50,7 @@ async def check_union_member(
     v: Optional[str] = __version__,
 ):
     """Проверяет наличие пользователя в списке."""
+
     surname = surname.upper()
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:

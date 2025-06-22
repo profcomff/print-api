@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, or_
 
 from print_service import __version__
 from print_service.exceptions import UnionStudentDuplicate, UserNotFound
-from print_service.models import UnionMember
+from print_service.models.db import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import get_settings
 
@@ -22,7 +22,7 @@ settings = get_settings()
 
 # region schemas
 class UserCreate(BaseModel):
-    username: constr(strip_whitespace=True, to_upper=True, min_length=1)
+    surname: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
     student_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
 
@@ -52,7 +52,7 @@ async def check_union_member(
     """Проверяет наличие пользователя в списке."""
 
     surname = surname.upper()
-    user = db.session.query(UnionMember)
+    user = UnionMember.query(session=db.session)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user: UnionMember = user.filter(
@@ -67,7 +67,7 @@ async def check_union_member(
         return bool(user)
 
     if not user:
-        raise UserNotFound()
+        raise UserNotFound(obj=UnionMember, obj_id_or_name=surname)
     else:
         return {
             'surname': user.surname,
@@ -95,7 +95,7 @@ def update_list(
 
     for user in input.users:
         db_user: UnionMember = (
-            db.session.query(UnionMember)
+            UnionMember.query(session=db.session)
             .filter(
                 or_(
                     and_(
@@ -112,18 +112,16 @@ def update_list(
         )
 
         if db_user:
-            db_user.surname = user.username
-            db_user.union_number = user.union_number
-            db_user.student_number = user.student_number
+            UnionMember.update(session=db.session, id=db_user.id, **user.model_dump(exclude_unset=False))
         else:
             db.session.add(
                 UnionMember(
-                    surname=user.username,
+                    surname=user.surname,
                     union_number=user.union_number,
                     student_number=user.student_number,
                 )
             )
-        db.session.flush()
+        UnionMember.create(session=db.session, **user.model_dump(exclude_unset=False))
 
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}

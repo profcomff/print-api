@@ -17,9 +17,9 @@ from print_service.exceptions import (
     IsNotUploaded,
     UnprocessableFileInstance,
 )
-from print_service.models import File
-from print_service.models import File as FileModel
-from print_service.models import PrintFact
+from print_service.models.db import File
+from print_service.models.db import File as FileModel
+from print_service.models.db import PrintFact
 from print_service.routes import exc_handlers
 from print_service.settings import Settings, get_settings
 
@@ -57,7 +57,7 @@ def generate_filename(original_filename: str):
 def get_file(dbsession, pin: str or list[str]):
     pin = [pin.upper()] if isinstance(pin, str) else tuple(p.upper() for p in pin)
     files: list[FileModel] = (
-        dbsession.query(FileModel)
+        FileModel.query(session=dbsession)
         .filter(func.upper(FileModel.pin).in_(pin))
         .order_by(FileModel.created_at.desc())
         .all()
@@ -86,7 +86,9 @@ def get_file(dbsession, pin: str or list[str]):
             if number_of_pages > max(f.flatten_pages):
                 raise InvalidPageRequest()
         file_model = PrintFact(file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count)
-        dbsession.add(file_model)
+        PrintFact.create(
+            session=dbsession, file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count
+        )
         dbsession.commit()
     return result
 

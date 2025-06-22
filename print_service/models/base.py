@@ -8,6 +8,7 @@ from sqlalchemy.orm import Query, Session, as_declarative, declared_attr
 
 from ..exceptions import AlreadyExists, ObjectNotFound
 
+
 @as_declarative()
 class Base:
     """Base class for all database entities"""

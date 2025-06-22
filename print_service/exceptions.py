@@ -3,6 +3,7 @@ from print_service.settings import get_settings
 
 settings = get_settings()
 
+
 class PrintAPIError(Exception):
     eng: str
     ru: str
@@ -12,6 +13,7 @@ class PrintAPIError(Exception):
         self.ru = ru
         super().__init__(eng)
 
+
 class ObjectNotFound(Exception):
     def __init__(self, obj: type, obj_id_or_name: int | str):
         super().__init__(
@@ -19,12 +21,14 @@ class ObjectNotFound(Exception):
             f"Объект {obj.__name__}  с идентификатором {obj_id_or_name} не найден",
         )
 
+
 class AlreadyExists(PrintAPIError):
     def __init__(self, obj: type, obj_id_or_name: int | str):
         super().__init__(
             f"Object {obj.__name__}, {obj_id_or_name=} already exists",
             f"Объект {obj.__name__} с идентификатором {obj_id_or_name=} уже существует",
         )
+
 
 class TerminalTokenNotFound(ObjectNotFound):
     pass

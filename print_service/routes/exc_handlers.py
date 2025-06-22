@@ -1,4 +1,3 @@
-import requests.models
 import starlette.requests
 from starlette.responses import JSONResponse
 

@@ -13,7 +13,7 @@ from redis import Redis
 from starlette.status import WS_1000_NORMAL_CLOSURE
 from typing_extensions import Annotated
 
-from print_service.exceptions import TerminalQRNotFound
+from print_service.exceptions import NotAuthenticated, TerminalQRNotFound, TokenAlreadyUsed, Unauthorized
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import get_file
@@ -89,7 +89,7 @@ class InstantPrintFetcher:
         me = await auth.check_token(self.terminal_token)
         if me is None:
             logger.error("Not authenticated")
-            raise Exception("Not authenticated")
+            raise NotAuthenticated
 
         for scope in me['session_scopes']:
             if scope['name'] == "print.qr_task.get":
@@ -97,14 +97,14 @@ class InstantPrintFetcher:
         else:
             logger.error("Unauthorized")
             logger.debug(me)
-            raise Exception("Unauthorized")
+            raise Unauthorized
 
         # Token shouldn't be used yet
         for key in self.redis.keys():
             value = self.redis.get(key)
             if self.redis.get(key) == self.terminal_token.encode():
                 logger.error("Token already used")
-                raise Exception("Token already used")
+                raise TokenAlreadyUsed
 
     def __aiter__(self):
         return self

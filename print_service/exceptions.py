@@ -90,3 +90,18 @@ class IsNotUploaded(Exception):
 class UnprocessableFileInstance(Exception):
     def __init__(self):
         super().__init__(f'Unprocessable file instance')
+
+
+class TokenAlreadyUsed(Exception):
+    def __init__(self):
+        super().__init__(f'Token already used')
+
+
+class Unauthorized(Exception):
+    def __init__(self):
+        super().__init__(f'Unauthorized')
+
+
+class NotAuthenticated(Exception):
+    def __init__(self):
+        super().__init__(f'Not authenticated')

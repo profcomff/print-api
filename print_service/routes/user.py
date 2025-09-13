@@ -3,9 +3,8 @@ from typing import List, Optional
 
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
-from fastapi.exceptions import HTTPException
 from fastapi_sqlalchemy import db
-from pydantic import constr, validate_call
+from pydantic import constr
 from sqlalchemy import and_, func, or_
 
 from print_service import __version__
@@ -51,7 +50,6 @@ async def check_union_member(
 ):
     """Проверяет наличие пользователя в списке."""
 
-    surname = surname.upper()
     user = db.session.query(UnionMember)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)

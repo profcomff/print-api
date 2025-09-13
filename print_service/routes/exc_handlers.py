@@ -1,4 +1,3 @@
-import requests.models
 import starlette.requests
 from starlette.responses import JSONResponse
 
@@ -54,7 +53,7 @@ async def too_many_pages(req: starlette.requests.Request, exc: TooManyPages):
 
 
 @app.exception_handler(InvalidPageRequest)
-async def invalid_format(req: starlette.requests.Request, exc: TooManyPages):
+async def invalid_format(req: starlette.requests.Request, exc: InvalidPageRequest):
     return JSONResponse(
         content=StatusResponseModel(
             status="Error",

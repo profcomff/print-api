@@ -166,7 +166,7 @@ async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
         content=StatusResponseModel(
             status="Error", message=f"{exc}", ru="Файл уже загружен"
         ).model_dump(),
-        status_code=415,
+        status_code=409,
     )
 
 
@@ -174,7 +174,7 @@ async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
 async def is_corrupted(req: starlette.requests.Request, exc: IsCorrupted):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл повреждён").model_dump(),
-        status_code=415,
+        status_code=422,
     )
 
 
@@ -204,5 +204,5 @@ async def not_uploaded(req: starlette.requests.Request, exc: IsNotUploaded):
         content=StatusResponseModel(
             status="Error", message=f"{exc}", ru="Файл не загружен"
         ).model_dump(),
-        status_code=415,
+        status_code=404,
     )

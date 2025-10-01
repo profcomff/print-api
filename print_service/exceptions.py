@@ -42,7 +42,7 @@ class TooLargeSize(Exception):
 
 class InvalidPageRequest(Exception):
     def __init__(self):
-        super().__init__(f'Invalid format')
+        super().__init__(f'The number of requested pages exceeds the number of pages')
 
 
 class UnionStudentDuplicate(Exception):
@@ -62,13 +62,13 @@ class PINGenerateError(Exception):
 
 class FileIsNotReceived(Exception):
     def __init__(self):
-        super().__init__(f'No file was recieved')
+        super().__init__(f'No file was received')
 
 
 class InvalidType(Exception):
     def __init__(self, content_type: str):
         super().__init__(
-            f'Only {", ".join(settings.CONTENT_TYPES)} files allowed, but {content_type} was recieved'
+            f'Only {", ".join(settings.CONTENT_TYPES)} files allowed, but {content_type} was received'
         )
 
 

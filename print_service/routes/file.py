@@ -266,7 +266,7 @@ async def update_file_options(
     db.session.commit()
     if file_model.flatten_pages:
         if file_model.number_of_pages < max(file_model.flatten_pages):
-            raise InvalidPageRequest
+            raise InvalidPageRequest()
     if file_model.sheets_count > settings.MAX_PAGE_COUNT:
         raise TooManyPages()
     return {

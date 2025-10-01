@@ -80,7 +80,7 @@ async def terminal_not_found_by_token(req: starlette.requests.Request, exc: Term
         content=StatusResponseModel(
             status="Error", message="Terminal not found by token", ru="Токен не найден"
         ).model_dump(),
-        status_code=400,
+        status_code=404,
     )
 
 

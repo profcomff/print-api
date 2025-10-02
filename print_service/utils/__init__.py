@@ -14,6 +14,8 @@ from print_service.exceptions import (
     InvalidPageRequest,
     IsNotUploaded,
     UnprocessableFileInstance,
+    PrintLimitExceed,
+    PrintCodeExpired
 )
 from print_service.models.db import File
 from print_service.models.db import File as FileModel
@@ -82,7 +84,16 @@ def get_file(dbsession, pin: str or list[str]):
         if f.flatten_pages:
             if number_of_pages > max(f.flatten_pages):
                 raise InvalidPageRequest()
+        #тут должна быть проверка на строк годности и число распечатанных документов(print_facts у FileModel)
+        if f.created_at + timedelta(hours=settings.PIN_TTL) >= datetime.now():
+            raise PrintCodeExpired()
+        
+        if len(f.print_facts) > settings.MAX_PRINTS_PER_PIN:
+            raise PrintLimitExceed()
+
+        
         file_model = PrintFact(file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count)
+        
         PrintFact.create(
             session=dbsession, file_id=f.id, owner_id=f.owner_id, sheets_used=f.sheets_count
         )

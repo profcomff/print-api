@@ -289,6 +289,7 @@ async def update_file_options(
         404: {'model': StatusResponseModel, 'detail': 'Pin not found'},
         415: {'model': StatusResponseModel, 'detail': 'File error'},
         416: {'model': StatusResponseModel, 'detail': 'Invalid page request'},
+        410: {'model': StatusResponseModel, 'detail': 'Print code expired'}
     },
     response_model=ReceiveOutput,
 )

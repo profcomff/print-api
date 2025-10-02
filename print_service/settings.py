@@ -20,7 +20,7 @@ class Settings(UnionAuthSettings, BaseSettings):
     MAX_PAGE_COUNT: int = 50
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
     STATIC_FOLDER: DirectoryPath | None = None
-    MAX_PRINTS_PER_PIN = 7 #тестовое максимальное число печатей для одного кода 
+    MAX_PRINTS_PER_PIN: int = 7 #тестовое максимальное число печатей для одного кода 
 
     ALLOW_STUDENT_NUMBER: bool = False
 

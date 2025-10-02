@@ -22,7 +22,9 @@ from print_service.exceptions import (
     UnprocessableFileInstance,
     UserNotFound,
     PrintCodeExpired,
-    PrintLimitExceed
+    PrintLimitExceed,
+    ObjectNotFound,
+    AlreadyExists
 )
 from print_service.routes.base import app
 from print_service.settings import get_settings
@@ -225,4 +227,22 @@ async def expire_pin(req: starlette.requests.Request, exc: PrintCodeExpired):
             status="Error", message=f"{exc}", ru="Время жизни Pin закончилось"
         ).model_dump(),
         status_code=410,
+    )
+
+@app.exception_handler(ObjectNotFound)
+async def obj_not_found(req: starlette.requests.Request, exc: ObjectNotFound):
+    return JSONResponse(
+        content=StatusResponseModel(
+            status="Error", message=f"{exc}", ru="Объект не найден"
+        ).model_dump(),
+        status_code=404
+    )
+
+@app.exception_handler(AlreadyExists)
+async def obj_exists(req: starlette.requests.Request, exc: AlreadyExists):
+    return JSONResponse(
+        content=StatusResponseModel(
+            status="Error", message=f"{exc}", ru="Объект уже существует"
+        ).model_dump(),
+        status_code=403
     )

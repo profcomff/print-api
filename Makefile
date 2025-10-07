@@ -21,4 +21,4 @@ redis:
 	sleep 3
 
 migrate:
-	alembic upgrade head
+	source ./venv/bin/activate && alembic upgrade head

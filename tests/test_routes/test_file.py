@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from starlette import status
 
 from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded
-from print_service.models import File
+from print_service.models.db import File
 from print_service.settings import get_settings
 from print_service.utils import checking_for_pdf, get_file
 
@@ -25,7 +25,7 @@ def test_post_success(union_member_user, client, dbsession):
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
-    db_file = dbsession.query(File).filter(File.pin == res.json()['pin']).one_or_none()
+    db_file = File.query(session=dbsession).filter(File.pin == res.json()['pin']).one_or_none()
     assert db_file is not None
     assert db_file.source == 'webapp'
     body2 = {
@@ -36,13 +36,12 @@ def test_post_success(union_member_user, client, dbsession):
     }
     res2 = client.post(url, data=json.dumps(body2))
     assert res2.status_code == status.HTTP_200_OK
-    db_file2 = dbsession.query(File).filter(File.pin == res2.json()['pin']).one_or_none()
+    db_file2 = File.query(session=dbsession).filter(File.pin == res2.json()['pin']).one_or_none()
     assert db_file2 is not None
     assert db_file2.source == 'unknown'
-    dbsession.delete(db_file)
-    dbsession.delete(db_file2)
+    File.delete(db_file.id, session=dbsession)
+    File.delete(db_file2.id, session=dbsession)
     dbsession.commit()
-
 
 def test_post_unauthorized_user(client):
     body = {

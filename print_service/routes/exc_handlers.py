@@ -1,9 +1,9 @@
-from email import message
 import starlette.requests
 from starlette.responses import JSONResponse
 
 from print_service.base import StatusResponseModel
 from print_service.exceptions import (
+    AlreadyExists,
     AlreadyUploaded,
     FileIsNotReceived,
     FileNotFound,
@@ -12,8 +12,11 @@ from print_service.exceptions import (
     IsCorrupted,
     IsNotUploaded,
     NotInUnion,
+    ObjectNotFound,
     PINGenerateError,
     PINNotFound,
+    PrintCodeExpired,
+    PrintLimitExceed,
     TerminalQRNotFound,
     TerminalTokenNotFound,
     TooLargeSize,
@@ -21,10 +24,6 @@ from print_service.exceptions import (
     UnionStudentDuplicate,
     UnprocessableFileInstance,
     UserNotFound,
-    PrintCodeExpired,
-    PrintLimitExceed,
-    ObjectNotFound,
-    AlreadyExists
 )
 from print_service.routes.base import app
 from print_service.settings import get_settings
@@ -134,6 +133,7 @@ async def generate_error(req: starlette.requests.Request, exc: PINGenerateError)
         status_code=500,
     )
 
+
 @app.exception_handler(FileIsNotReceived)
 async def file_not_received(req: starlette.requests.Request, exc: FileIsNotReceived):
     return JSONResponse(
@@ -211,6 +211,7 @@ async def not_uploaded(req: starlette.requests.Request, exc: IsNotUploaded):
         status_code=415,
     )
 
+
 @app.exception_handler(PrintLimitExceed)
 async def exceed_print_limit(req: starlette.requests.Request, exc: PrintLimitExceed):
     return JSONResponse(
@@ -219,6 +220,7 @@ async def exceed_print_limit(req: starlette.requests.Request, exc: PrintLimitExc
         ).model_dump(),
         status_code=410,
     )
+
 
 @app.exception_handler(PrintCodeExpired)
 async def expire_pin(req: starlette.requests.Request, exc: PrintCodeExpired):
@@ -229,14 +231,16 @@ async def expire_pin(req: starlette.requests.Request, exc: PrintCodeExpired):
         status_code=410,
     )
 
+
 @app.exception_handler(ObjectNotFound)
 async def obj_not_found(req: starlette.requests.Request, exc: ObjectNotFound):
     return JSONResponse(
         content=StatusResponseModel(
             status="Error", message=f"{exc}", ru="Объект не найден"
         ).model_dump(),
-        status_code=404
+        status_code=404,
     )
+
 
 @app.exception_handler(AlreadyExists)
 async def obj_exists(req: starlette.requests.Request, exc: AlreadyExists):
@@ -244,5 +248,5 @@ async def obj_exists(req: starlette.requests.Request, exc: AlreadyExists):
         content=StatusResponseModel(
             status="Error", message=f"{exc}", ru="Объект уже существует"
         ).model_dump(),
-        status_code=403
+        status_code=403,
     )

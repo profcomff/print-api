@@ -1,7 +1,6 @@
 import json
 
 import pytest
-from fastapi import HTTPException
 from starlette import status
 
 from print_service.exceptions import FileNotFound, InvalidPageRequest, IsNotUploaded
@@ -42,6 +41,7 @@ def test_post_success(union_member_user, client, dbsession):
     File.delete(db_file.id, session=dbsession)
     File.delete(db_file2.id, session=dbsession)
     dbsession.commit()
+
 
 def test_post_unauthorized_user(client):
     body = {

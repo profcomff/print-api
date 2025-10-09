@@ -16,7 +16,9 @@ def union_member_user(dbsession):
     UnionMember.create(session=dbsession, **union_member)
     dbsession.commit()
     yield union_member
-    db_user = UnionMember.query(session=dbsession).filter(UnionMember.id == union_member['id']).one_or_none()
+    db_user = (
+        UnionMember.query(session=dbsession).filter(UnionMember.id == union_member['id']).one_or_none()
+    )
     assert db_user is not None
     PrintFact.query(session=dbsession).filter(PrintFact.owner_id == union_member['id']).delete()
     UnionMember.query(session=dbsession).filter(UnionMember.id == union_member['id']).delete()

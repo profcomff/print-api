@@ -20,13 +20,13 @@ class Settings(UnionAuthSettings, BaseSettings):
     MAX_PAGE_COUNT: int = 50
     STORAGE_TIME: int = 7 * 24  # Время хранения файла в часах
     STATIC_FOLDER: DirectoryPath | None = None
-    MAX_PRINTS_PER_PIN: int = 7 #тестовое максимальное число печатей для одного кода 
+    MAX_PRINTS_PER_PIN: int = 7  # тестовое максимальное число печатей для одного кода
 
     ALLOW_STUDENT_NUMBER: bool = False
 
     PIN_SYMBOLS: str = string.ascii_uppercase + string.digits
     PIN_LENGTH: int = 6
-    PIN_TTL: int = 3600 #тестовое время жизни кода печати
+    PIN_TTL: int = 3600  # тестовое время жизни кода печати
 
     CORS_ALLOW_ORIGINS: list[str] = ['*']
     CORS_ALLOW_CREDENTIALS: bool = True

@@ -3,6 +3,7 @@ from print_service.settings import get_settings
 
 settings = get_settings()
 
+
 class ObjectNotFound(Exception):
     def __init__(self, obj: type, obj_id_or_name: int | str):
         super().__init__(
@@ -80,9 +81,11 @@ class InvalidType(Exception):
             f'Only {", ".join(settings.CONTENT_TYPES)} files allowed, but {content_type} was recieved'
         )
 
+
 class PrintCodeExpired(Exception):
     def __init__(self):
         super().__init__(f'Print code expired')
+
 
 class PrintLimitExceed(Exception):
     def __init__(self):

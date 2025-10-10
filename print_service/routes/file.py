@@ -4,6 +4,7 @@ from os.path import abspath, exists
 
 import aiofiles
 import aiofiles.os
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, File, UploadFile
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
@@ -27,7 +28,6 @@ from print_service.models import File as FileModel
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import checking_for_pdf, generate_filename, generate_pin, get_file
-from print_service.utils.union_auth_check import UnionAuthChecker
 
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ class ReceiveOutput(BaseModel):
 )
 async def send(
     inp: SendInput,
-    user_auth=Depends(UnionAuthChecker()),
+    user_auth=Depends(UnionAuth(scopes=["print.service.use"])),
 ):
     """Получить пин код для загрузки и скачивания файла.
 

@@ -12,7 +12,6 @@ from fastapi_sqlalchemy import db
 from pydantic import Field, field_validator
 from sqlalchemy import func, or_
 
-from print_service.schema import StatusResponseModel
 from print_service.exceptions import (
     AlreadyUploaded,
     FileIsNotReceived,
@@ -29,14 +28,13 @@ from print_service.exceptions import (
 )
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
-from print_service.schema import BaseModel
+from print_service.schema import BaseModel, StatusResponseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import checking_for_pdf, generate_filename, generate_pin, get_file
 
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
 
 
 class PrintOptions(BaseModel):
@@ -96,7 +94,6 @@ class ReceiveOutput(BaseModel):
         example='2021-11-02-ZMNF5V...9.pdf',
     )
     options: PrintOptions
-
 
 
 @router.post(
@@ -279,6 +276,3 @@ async def update_file_options(
 async def print_file(pin: str, settings: Settings = Depends(get_settings)):
     """Получить файл для печати"""
     return get_file(db.session, pin)[0]
-
-
-

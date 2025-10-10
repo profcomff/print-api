@@ -20,7 +20,6 @@ router = APIRouter()
 settings = get_settings()
 
 
-
 class UserCreate(BaseModel):
     username: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
@@ -29,9 +28,6 @@ class UserCreate(BaseModel):
 
 class UpdateUserList(BaseModel):
     users: List[UserCreate]
-
-
-
 
 
 @router.get(
@@ -124,6 +120,3 @@ def update_list(
 
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
-
-
-

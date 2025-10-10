@@ -22,7 +22,6 @@ class Base:
         return "{}({})".format(c.__class__.__name__, ', '.join(attrs))
 
 
-
 class BaseDbModel(Base):
     __abstract__ = True
 

@@ -2,7 +2,6 @@ import requests.models
 import starlette.requests
 from starlette.responses import JSONResponse
 
-from print_service.schema import StatusResponseModel
 from print_service.exceptions import (
     AlreadyUploaded,
     FileIsNotReceived,
@@ -23,6 +22,7 @@ from print_service.exceptions import (
     UserNotFound,
 )
 from print_service.routes.base import app
+from print_service.schema import StatusResponseModel
 from print_service.settings import get_settings
 
 

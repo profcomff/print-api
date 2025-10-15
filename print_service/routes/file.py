@@ -18,7 +18,6 @@ from print_service.exceptions import (
     InvalidPageRequest,
     InvalidType,
     IsCorrupted,
-    NotInUnion,
     PINGenerateError,
     PINNotFound,
     TooLargeSize,
@@ -102,10 +101,10 @@ async def send(
 ):
     """Получить пин код для загрузки и скачивания файла.
 
+    Scopes: `["print.service.use"]`
+
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
-    if user_auth is None:
-        raise NotInUnion()
     try:
         pin = generate_pin(db.session)
     except RuntimeError:

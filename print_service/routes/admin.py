@@ -67,3 +67,13 @@ async def reboot_terminal(
         return {'status': 'ok'}
     sender.redis.close()
     raise TerminalTokenNotFound()
+
+
+@router.get("/settings")
+async def setting_to_bot(user=Depends(UnionAuth(scopes=["print.print_bot.settings"]))):
+    logger.info(f"Bot {user} clone settings")
+    return {
+        "MAX_SIZE": settings.MAX_SIZE,
+        "MAX_PAGE_COUNT": settings.MAX_PAGE_COUNT,
+        "CONTENT_TYPES": settings.CONTENT_TYPES,
+    }

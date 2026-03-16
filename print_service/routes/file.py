@@ -6,11 +6,10 @@ import aiofiles
 import aiofiles.os
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, File, UploadFile
-from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
 from pydantic import Field, field_validator
-from sqlalchemy import func, or_
+from sqlalchemy import func
 
 from print_service.base import StatusResponseModel
 from print_service.exceptions import (
@@ -19,16 +18,12 @@ from print_service.exceptions import (
     InvalidPageRequest,
     InvalidType,
     IsCorrupted,
-    NotInUnion,
     PINGenerateError,
     PINNotFound,
     TooLargeSize,
     TooManyPages,
-    UnprocessableFileInstance,
-    UserNotFound,
 )
 from print_service.models import File as FileModel
-from print_service.models import UnionMember
 from print_service.schema import BaseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import checking_for_pdf, generate_filename, generate_pin, get_file
@@ -60,16 +55,6 @@ class PrintOptions(BaseModel):
 
 
 class SendInput(BaseModel):
-    surname: str | None = Field(
-        default=None,
-        description='Фамилия',
-        example='Иванов',
-    )
-    number: str | None = Field(
-        default=None,
-        description='Номер профсоюзного или студенческого билетов',
-        example='1015000',
-    )
     filename: str = Field(
         description='Название файла',
         example='filename.pdf',
@@ -112,41 +97,21 @@ class ReceiveOutput(BaseModel):
 )
 async def send(
     inp: SendInput,
-    user_auth=Depends(UnionAuth(allow_none=True)),
-    settings: Settings = Depends(get_settings),
+    user_auth=Depends(UnionAuth(scopes=["print.service.use"])),
 ):
     """Получить пин код для загрузки и скачивания файла.
 
+    Scopes: `["print.service.use"]`
+
     Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
     """
-    user = db.session.query(UnionMember)
-    if not settings.ALLOW_STUDENT_NUMBER:
-        user = user.filter(UnionMember.union_number != None)
-
-    if (inp.number is not None) and (inp.surname is not None):
-        user = user.filter(
-            or_(
-                func.upper(UnionMember.student_number) == inp.number.upper(),
-                func.upper(UnionMember.union_number) == inp.number.upper(),
-            ),
-            func.upper(UnionMember.surname) == inp.surname.upper(),
-        )
-
-    else:
-        if not "print.file.send" in [scope["name"] for scope in user_auth.get('session_scopes')]:
-            raise NotInUnion()
-
-    user = user.one_or_none()
-
-    if user is None:
-        raise NotInUnion()
     try:
         pin = generate_pin(db.session)
     except RuntimeError:
         raise PINGenerateError()
     filename = generate_filename(inp.filename)
     file_model = FileModel(pin=pin, file=filename, source=inp.source)
-    file_model.owner = user
+    file_model.owner_id = user_auth['id']
     file_model.option_copies = inp.options.copies
     file_model.option_pages = inp.options.pages
     file_model.option_two_sided = inp.options.two_sided

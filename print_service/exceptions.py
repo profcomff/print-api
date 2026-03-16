@@ -5,7 +5,17 @@ settings = get_settings()
 
 
 class ObjectNotFound(Exception):
-    pass
+    def __init__(self, obj: type, obj_id_or_name: int | str):
+        super().__init__(
+            f"Object {obj.__name__} {obj_id_or_name=} not found",
+        )
+
+
+class AlreadyExists(Exception):
+    def __init__(self, obj: type, obj_id_or_name: int | str):
+        super().__init__(
+            f"Object {obj.__name__}, {obj_id_or_name=} already exists",
+        )
 
 
 class TerminalTokenNotFound(ObjectNotFound):
@@ -70,6 +80,16 @@ class InvalidType(Exception):
         super().__init__(
             f'Only {", ".join(settings.CONTENT_TYPES)} files allowed, but {content_type} was recieved'
         )
+
+
+class PrintCodeExpired(Exception):
+    def __init__(self):
+        super().__init__(f'Print code expired')
+
+
+class PrintLimitExceed(Exception):
+    def __init__(self):
+        super().__init__(f'Print limit exceed')
 
 
 class AlreadyUploaded(Exception):

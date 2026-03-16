@@ -33,7 +33,7 @@ def test_post_success(client, dbsession):
     body = {
         'users': [
             {
-                'username': 'paul',
+                'surname': 'paul',
                 'union_number': '1966',
                 'student_number': '1967',
             }
@@ -41,8 +41,8 @@ def test_post_success(client, dbsession):
     }
     res = client.post(url, data=json.dumps(body))
     assert res.status_code == status.HTTP_200_OK
-    dbsession.query(UnionMember).filter(
-        UnionMember.surname == body['users'][0]['username'],
+    UnionMember.query(session=dbsession).filter(
+        UnionMember.surname == body['users'][0]['surname'],
         UnionMember.union_number == body['users'][0]['union_number'],
         UnionMember.student_number == body['users'][0]['student_number'],
     ).delete()
@@ -55,12 +55,12 @@ def test_post_success(client, dbsession):
         pytest.param(
             [
                 {
-                    'username': 'paul',
+                    'surname': 'paul',
                     'union_number': '404man',
                     'student_number': '30311',
                 },
                 {
-                    'username': 'marty',
+                    'surname': 'marty',
                     'union_number': '404man',
                     'student_number': '303112',
                 },
@@ -70,12 +70,12 @@ def test_post_success(client, dbsession):
         pytest.param(
             [
                 {
-                    'username': 'alice',
+                    'surname': 'alice',
                     'union_number': '500',
                     'student_number': '42',
                 },
                 {
-                    'username': 'polly',
+                    'surname': 'polly',
                     'union_number': '503',
                     'student_number': '42',
                 },

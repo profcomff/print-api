@@ -2,7 +2,7 @@ import json
 import logging
 
 from auth_lib.fastapi import UnionAuth
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from redis import Redis
 
 from print_service.exceptions import TerminalTokenNotFound

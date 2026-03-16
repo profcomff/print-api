@@ -6,7 +6,6 @@ import aiofiles
 import aiofiles.os
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, File, UploadFile
-from fastapi.exceptions import HTTPException
 from fastapi.params import Depends
 from fastapi_sqlalchemy import db
 from pydantic import Field, field_validator
@@ -24,8 +23,6 @@ from print_service.exceptions import (
     PINNotFound,
     TooLargeSize,
     TooManyPages,
-    UnprocessableFileInstance,
-    UserNotFound,
 )
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
@@ -258,7 +255,7 @@ async def update_file_options(
         .order_by(FileModel.created_at.desc())
         .one_or_none()
     )
-    print(options)
+
     if not file_model:
         raise PINNotFound(pin)
     file_model.option_pages = options.get('pages') or file_model.option_pages
@@ -269,7 +266,7 @@ async def update_file_options(
     db.session.commit()
     if file_model.flatten_pages:
         if file_model.number_of_pages < max(file_model.flatten_pages):
-            raise InvalidPageRequest
+            raise InvalidPageRequest()
     if file_model.sheets_count > settings.MAX_PAGE_COUNT:
         raise TooManyPages()
     return {

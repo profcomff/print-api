@@ -20,7 +20,6 @@ router = APIRouter()
 settings = get_settings()
 
 
-# region schemas
 class UserCreate(BaseModel):
     username: constr(strip_whitespace=True, to_upper=True, min_length=1)
     union_number: Optional[constr(strip_whitespace=True, to_upper=True, min_length=1)]
@@ -29,12 +28,6 @@ class UserCreate(BaseModel):
 
 class UpdateUserList(BaseModel):
     users: List[UserCreate]
-
-
-# endregion
-
-
-# region handlers
 
 
 @router.get(
@@ -49,10 +42,9 @@ async def check_union_member(
     number: constr(strip_whitespace=True, to_upper=True, min_length=1),
     v: Optional[str] = __version__,
 ):
-    """Проверяет наличие пользователя в списке."""
 
     surname = surname.upper()
-    user = db.session.query(UnionMember)
+    user = UnionMember.query(session=db.session)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
     user: UnionMember = user.filter(
@@ -82,7 +74,6 @@ def update_list(
     input: UpdateUserList,
     user=Depends(UnionAuth(scopes=["print.user.create", "print.user.update", "print.user.delete"])),
 ):
-    """Обновляет данные существующего пользователя или добавляет нового, если его нет."""
     logger.info(f"User {user} updated list")
 
     union_numbers = [user.union_number for user in input.users if user.union_number is not None]
@@ -95,7 +86,7 @@ def update_list(
 
     for user in input.users:
         db_user: UnionMember = (
-            db.session.query(UnionMember)
+            UnionMember.query(session=db.session)
             .filter(
                 or_(
                     and_(
@@ -115,6 +106,8 @@ def update_list(
             db_user.surname = user.username
             db_user.union_number = user.union_number
             db_user.student_number = user.student_number
+            if db_user.is_deleted:
+                db_user.is_deleted = False
         else:
             db.session.add(
                 UnionMember(
@@ -127,6 +120,3 @@ def update_list(
 
     db.session.commit()
     return {"status": "ok", "count": len(input.users)}
-
-
-# endregion

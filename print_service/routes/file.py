@@ -12,7 +12,6 @@ from fastapi_sqlalchemy import db
 from pydantic import Field, field_validator
 from sqlalchemy import func, or_
 
-from print_service.base import StatusResponseModel
 from print_service.exceptions import (
     AlreadyUploaded,
     FileIsNotReceived,
@@ -29,7 +28,7 @@ from print_service.exceptions import (
 )
 from print_service.models import File as FileModel
 from print_service.models import UnionMember
-from print_service.schema import BaseModel
+from print_service.schema import BaseModel, StatusResponseModel
 from print_service.settings import Settings, get_settings
 from print_service.utils import checking_for_pdf, generate_filename, generate_pin, get_file
 
@@ -38,7 +37,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-# region Schemas
 class PrintOptions(BaseModel):
     pages: str = Field('', description='Страницы для печати', example='2-4,6')
     copies: int = Field(1, description='Количество копий для печати')
@@ -98,10 +96,6 @@ class ReceiveOutput(BaseModel):
     options: PrintOptions
 
 
-# endregion
-
-
-# region handlers
 @router.post(
     '',
     responses={
@@ -115,11 +109,8 @@ async def send(
     user_auth=Depends(UnionAuth(allow_none=True)),
     settings: Settings = Depends(get_settings),
 ):
-    """Получить пин код для загрузки и скачивания файла.
-
-    Полученный пин-код можно использовать в методах POST и GET `/file/{pin}`.
-    """
-    user = db.session.query(UnionMember)
+    """Получить пин код для загрузки и скачивания файла"""
+    user = UnionMember.query(session=db.session)
     if not settings.ALLOW_STUDENT_NUMBER:
         user = user.filter(UnionMember.union_number != None)
 
@@ -177,16 +168,11 @@ async def send(
 async def upload_file(
     pin: str, file: UploadFile = File(...), settings: Settings = Depends(get_settings)
 ):
-    """Загрузить файл на сервер.
-
-    Требует пин-код, полученный в методе POST `/file`. Файл для пин-кода можно
-    загрузить лишь один раз. Файл должен быть размером до 5 000 000 байт
-    (меняется в настройках сервера).
-    """
+    """Загрузить файл на сервер"""
     if file == ...:
         raise FileIsNotReceived()
     file_model = (
-        db.session.query(FileModel)
+        FileModel.query(session=db.session)
         .filter(func.upper(FileModel.pin) == pin.upper())
         .order_by(FileModel.created_at.desc())
         .one_or_none()
@@ -247,18 +233,14 @@ async def upload_file(
 async def update_file_options(
     pin: str, inp: SendInputUpdate, settings: Settings = Depends(get_settings)
 ):
-    """Обновляет настройки печати.
-
-    Требует пин-код, полученный в методе POST `/file`. Обновлять настройки
-    можно бесконечное количество раз. Можно изменять настройки по одной."""
+    """Обновляет настройки печати"""
     options = inp.options.model_dump(exclude_unset=True)
     file_model = (
-        db.session.query(FileModel)
+        FileModel.query(session=db.session)
         .filter(func.upper(FileModel.pin) == pin.upper())
         .order_by(FileModel.created_at.desc())
         .one_or_none()
     )
-    print(options)
     if not file_model:
         raise PINNotFound(pin)
     file_model.option_pages = options.get('pages') or file_model.option_pages
@@ -292,13 +274,5 @@ async def update_file_options(
     response_model=ReceiveOutput,
 )
 async def print_file(pin: str, settings: Settings = Depends(get_settings)):
-    """Получить файл для печати.
-
-    Требует пин-код, полученный в методе POST `/file`. Файл можно скачать
-    бесконечное количество раз в течение 7 дней после загрузки (меняется в
-    настройках сервера).
-    """
+    """Получить файл для печати"""
     return get_file(db.session, pin)[0]
-
-
-# endregion

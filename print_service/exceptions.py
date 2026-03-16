@@ -1,33 +1,61 @@
+from typing import Type
+
 from print_service.settings import get_settings
 
 
 settings = get_settings()
 
 
-class ObjectNotFound(Exception):
-    pass
+class PrintAPIError(Exception):
+    eng: str
+    ru: str
+
+    def __init__(self, eng: str, ru: str) -> None:
+        self.eng = eng
+        self.ru = ru
+        super().__init__(eng)
+
+
+class ObjectNotFound(PrintAPIError):
+    def __init__(self, obj: type, obj_id_or_name: int | str):
+        super().__init__(
+            f"Object {obj.__name__} {obj_id_or_name=} not found",
+            f"Объект {obj.__name__} с идентификатором {obj_id_or_name} не найден",
+        )
+
+
+class AlreadyExists(PrintAPIError):
+    def __init__(self, obj: type, obj_id_or_name: int | str):
+        super().__init__(
+            f"Object {obj.__name__}, {obj_id_or_name=} already exists",
+            f"Объект {obj.__name__} с идентификатором {obj_id_or_name=} уже существует",
+        )
 
 
 class TerminalTokenNotFound(ObjectNotFound):
-    pass
+    def __init__(self, token_id: int | str):
+        super().__init__(type(self), token_id)
 
 
 class TerminalQRNotFound(ObjectNotFound):
-    pass
+    def __init__(self, qr_id: int | str):
+        super().__init__(type(self), qr_id)
 
 
 class PINNotFound(ObjectNotFound):
     def __init__(self, pin: str):
         self.pin = pin
+        super().__init__(type(self), pin)
 
 
 class UserNotFound(ObjectNotFound):
-    pass
+    def __init__(self, user_id: int | str):
+        super().__init__(type(self), user_id)
 
 
 class FileNotFound(ObjectNotFound):
-    def __init__(self, count: int):
-        self.count = count
+    def __init__(self, file_id: int | str):
+        super().__init__(type(self), file_id)
 
 
 class TooManyPages(Exception):

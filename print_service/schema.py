@@ -1,4 +1,10 @@
 from pydantic import BaseModel
 
 
-__all__ = ('BaseModel',)
+class StatusResponseModel(BaseModel):
+    status: str
+    message: str
+    ru: str
+
+
+__all__ = ('BaseModel', 'StatusResponseModel')

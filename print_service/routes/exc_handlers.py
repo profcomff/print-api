@@ -1,4 +1,3 @@
-import requests.models
 import starlette.requests
 from starlette.responses import JSONResponse
 
@@ -54,7 +53,7 @@ async def too_many_pages(req: starlette.requests.Request, exc: TooManyPages):
 
 
 @app.exception_handler(InvalidPageRequest)
-async def invalid_format(req: starlette.requests.Request, exc: TooManyPages):
+async def invalid_format(req: starlette.requests.Request, exc: InvalidPageRequest):
     return JSONResponse(
         content=StatusResponseModel(
             status="Error",
@@ -81,7 +80,7 @@ async def terminal_not_found_by_token(req: starlette.requests.Request, exc: Term
         content=StatusResponseModel(
             status="Error", message="Terminal not found by token", ru="Токен не найден"
         ).model_dump(),
-        status_code=400,
+        status_code=404,
     )
 
 
@@ -167,7 +166,7 @@ async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
         content=StatusResponseModel(
             status="Error", message=f"{exc}", ru="Файл уже загружен"
         ).model_dump(),
-        status_code=415,
+        status_code=409,
     )
 
 
@@ -175,7 +174,7 @@ async def already_upload(req: starlette.requests.Request, exc: AlreadyUploaded):
 async def is_corrupted(req: starlette.requests.Request, exc: IsCorrupted):
     return JSONResponse(
         content=StatusResponseModel(status="Error", message=f"{exc}", ru="Файл повреждён").model_dump(),
-        status_code=415,
+        status_code=422,
     )
 
 
@@ -205,5 +204,5 @@ async def not_uploaded(req: starlette.requests.Request, exc: IsNotUploaded):
         content=StatusResponseModel(
             status="Error", message=f"{exc}", ru="Файл не загружен"
         ).model_dump(),
-        status_code=415,
+        status_code=404,
     )
